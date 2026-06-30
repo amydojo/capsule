@@ -1,10 +1,12 @@
 :root {
-  --capsule-stone: #f7f5f1;
+  --capsule-stone: #f7f6f2;
   --capsule-stone-deep: #efede8;
-  --capsule-ash: #7d817f;
-  --capsule-graphite: #171918;
-  --capsule-blue: #276ef1;
-  --capsule-blue-soft: #dbe8ff;
-  --capsule-line: #d9d7d1;
+  --capsule-surface: #ffffff;
+  --capsule-ash: #a8aaa7;
+  --capsule-graphite: #17191c;
+  --capsule-blue: #2f7ef7;
+  --capsule-glow: rgba(47, 126, 247, 0.16);
+  --capsule-blue-soft: #e2ecff;
+  --capsule-line: #e5e2dc;
   --capsule-paper: #fffdfa;
 }

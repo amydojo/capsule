@@ -1,6 +1,19 @@
-export type TimelineStep = {
-  code: string;
+export type PreservationStage = "captured" | "isolated" | "analyzed" | "traced" | "preserved" | "sealed";
+
+export type ArtifactLifecycleStatus = "active" | "sealed" | "rediscovered";
+
+export type ArtifactTimelineEvent = {
+  id: string;
+  stage: PreservationStage | "created" | "updated" | "rediscovered";
   label: string;
+  description: string;
+  date: string;
+};
+
+export type ArtifactObservation = {
+  id: string;
+  text: string;
+  createdAt: string;
 };
 
 export type Artifact = {
@@ -11,12 +24,23 @@ export type Artifact = {
   classification: string;
   capturePoint: string;
   origin: string;
-  material: string;
+  material: string[];
   condition: string;
-  continuityScore: number;
-  preservationState: string;
+  visibleDetails: string[];
+  emotionalHypothesis: string;
   essence: string;
-  stage: string;
-  image: string | null;
-  timeline: TimelineStep[];
+  preservationState: ArtifactLifecycleStatus;
+  continuityScore: number;
+  currentStage: PreservationStage;
+  imageDataUrl: string;
+  thumbnailDataUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  observations: ArtifactObservation[];
+  timeline: ArtifactTimelineEvent[];
+  ai?: {
+    provider: string;
+    model: string;
+    usedFallback: boolean;
+  };
 };

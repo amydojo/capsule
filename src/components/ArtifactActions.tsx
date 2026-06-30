@@ -1,20 +1,23 @@
 type ArtifactActionsProps = {
   sealed: boolean;
   onSeal: () => void;
+  onAddObservation: () => void;
+  onViewTimeline: () => void;
 };
 
-export default function ArtifactActions({ sealed, onSeal }: ArtifactActionsProps) {
+export default function ArtifactActions({ sealed, onSeal, onAddObservation, onViewTimeline }: ArtifactActionsProps) {
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-wrap gap-3 pt-6">
-      <button className="rounded-full border border-[var(--capsule-line)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--capsule-graphite)] transition hover:border-[var(--capsule-ash)]">
+    <div className="mx-auto flex w-full max-w-4xl flex-wrap gap-3 pt-7">
+      <button onClick={onAddObservation} className="secondary-button px-5 py-3 text-sm font-medium">
         Add Observation
       </button>
-      <button className="rounded-full border border-[var(--capsule-line)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--capsule-graphite)] transition hover:border-[var(--capsule-ash)]">
+      <button onClick={onViewTimeline} className="secondary-button px-5 py-3 text-sm font-medium">
         View Timeline
       </button>
       <button
         onClick={onSeal}
-        className="rounded-full bg-[var(--capsule-graphite)] px-5 py-3 text-sm font-medium text-white shadow-[0_12px_30px_rgba(23,25,24,0.16)] transition hover:translate-y-[-1px]"
+        disabled={sealed}
+        className="primary-button min-w-0 px-5 py-3 text-sm font-medium"
       >
         {sealed ? "Sealed" : "Seal Fossil"}
       </button>
