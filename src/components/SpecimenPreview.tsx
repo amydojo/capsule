@@ -15,7 +15,7 @@ export default function SpecimenPreview({ extraction, onContinue, onReselect }: 
       <CaptureFrame label="SPECIMEN LOCKED" status="SOURCE RETAINED" mode="preview">
         <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-6 py-16 text-center text-white sm:px-10">
           <div>
-            <p className="text-xl font-semibold">This Specimen Image will become the preserved artifact.</p>
+            <p className="text-xl font-semibold">Object ready for preservation.</p>
             <p className="mt-2 text-sm leading-6 text-white/58">Source Capture retained as provenance.</p>
           </div>
           <motion.div

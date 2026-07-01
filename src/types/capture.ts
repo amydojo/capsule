@@ -8,9 +8,9 @@ export type CaptureInput = {
   thumbnailDataUrl?: string;
   objectBoundary?: ObjectBoundary;
   extraction?: Omit<ExtractionResult, "specimenImageDataUrl" | "sourceImageDataUrl" | "objectBoundary">;
-  objectName: string;
-  whyNow: string;
-  futureMemory: string;
+  objectName?: string;
+  whyNow?: string;
+  futureMemory?: string;
   origin?: string;
   capturePoint: string;
 };

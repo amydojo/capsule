@@ -22,10 +22,10 @@ export const CaptureInputSchema = z.object({
       createdAt: z.string().optional(),
     })
     .optional(),
-  objectName: z.string().min(1),
-  whyNow: z.string().min(1),
-  futureMemory: z.string().min(1),
-  origin: z.string().optional().default(""),
+  objectName: z.string().trim().min(1).optional().default("Object"),
+  whyNow: z.string().trim().min(1).optional().default("Preserved from a Capsule capture."),
+  futureMemory: z.string().trim().min(1).optional().default("This object existed here and was worth preserving."),
+  origin: z.string().optional().default("field capture"),
   capturePoint: z.string().min(1),
 });
 

@@ -33,7 +33,7 @@ Rules:
 - essence must be one sentence, under 18 words.
 - classification should be concise.
 - condition should sound observational.
-- if object boundary is uncertain, set condition to "user-captured, object boundary uncertain".
+- if the object field is unclear, use cautious language such as "captured for preservation".
 - visibleDetails should be concrete.
 - visibleDetails should reference selected specimen details.
 - emotionalHypothesis should be cautious.

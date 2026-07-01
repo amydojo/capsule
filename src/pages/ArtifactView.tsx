@@ -13,15 +13,15 @@ import { getSpecimenImageDataUrl } from "../utils/artifactImage";
 const polishVisibleDetail = (detail: string) => {
   const normalized = detail.toLowerCase();
   if (normalized.includes("uploaded") && normalized.includes("object image")) return "selected specimen region";
-  if (normalized.includes("user-provided") && normalized.includes("object context")) return "user context preserved with specimen";
-  if (normalized.includes("mixed") && normalized.includes("material") && normalized.includes("inferred")) return "material unresolved from source capture";
+  if (normalized.includes("user-provided") && normalized.includes("object context")) return "selected specimen evidence retained";
+  if (normalized.includes("mixed") && normalized.includes("material") && normalized.includes("inferred")) return "surface details pending closer analysis";
   return detail;
 };
 
 export default function ArtifactView() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const timelineRef = useRef<HTMLElement>(null);
+  const timelineRef = useRef<HTMLDetailsElement>(null);
   const [artifact, setArtifact] = useState<Artifact | undefined>(() => (id ? getArtifactById(id) : undefined));
   const [showObservationInput, setShowObservationInput] = useState(false);
   const [observationText, setObservationText] = useState("");
@@ -82,13 +82,15 @@ export default function ArtifactView() {
           <SpecimenStage mode="artifact" tone="light" imageDataUrl={specimenImage} imageAlt={artifact.title} showIsolationChip={Boolean(specimenImage)} isolationLabel={isolationLabel} />
         </motion.div>
         <div className="mt-10 sm:mt-14">
-          <MetadataTable artifact={artifact} />
           <ArtifactActions
             sealed={sealed}
             onSeal={handleSeal}
             onAddObservation={() => setShowObservationInput((value) => !value)}
             onViewTimeline={() => timelineRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
           />
+          <div className="mt-8">
+            <MetadataTable artifact={artifact} />
+          </div>
           {showObservationInput && (
             <div className="mx-auto mt-5 max-w-4xl rounded-2xl border border-[var(--capsule-line)] bg-white/54 p-5">
               <label className="mono-label text-[0.64rem] text-[var(--capsule-ash)]">Observation</label>
@@ -106,30 +108,28 @@ export default function ArtifactView() {
           )}
         </div>
 
-        <section className="mx-auto mt-14 grid max-w-4xl gap-8 border-t border-[var(--capsule-line)] pt-8 sm:mt-20 sm:pt-10 md:grid-cols-2">
-          <div>
-            <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Visible Details</p>
-            <ul className="mt-5 space-y-3 text-sm leading-6 text-[var(--capsule-graphite)]">
-              {visibleDetails.map((detail, index) => (
-                <li key={`${detail}-${index}`} className="border-b border-[rgba(229,226,220,0.62)] pb-3">{detail}</li>
-              ))}
-            </ul>
+        <details className="mx-auto mt-14 max-w-4xl border-t border-[var(--capsule-line)] pt-8 sm:mt-20 sm:pt-10">
+          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Record Details</summary>
+          <div className="mt-6 grid gap-8 md:grid-cols-2">
+            <div>
+              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Visible Details</p>
+              <ul className="mt-5 space-y-3 text-sm leading-6 text-[var(--capsule-graphite)]">
+                {visibleDetails.map((detail, index) => (
+                  <li key={`${detail}-${index}`} className="border-b border-[rgba(229,226,220,0.62)] pb-3">{detail}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Continuity Note</p>
+              <p className="mt-5 text-sm leading-7 text-[var(--capsule-graphite)]">{artifact.emotionalHypothesis}</p>
+            </div>
           </div>
-          <div>
-            <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Continuity Note</p>
-            <p className="mt-5 text-sm leading-7 text-[var(--capsule-graphite)]">{artifact.emotionalHypothesis}</p>
-            {artifact.ai && (
-              <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
-                {artifact.ai.provider} / {artifact.ai.model} / {artifact.ai.usedFallback ? "fallback" : "vision"}
-              </p>
-            )}
-          </div>
-        </section>
+        </details>
 
         {sourceImage && <SourceCapturePreview sourceImageDataUrl={sourceImage} title={artifact.title} />}
 
-        <section ref={timelineRef} className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
-          <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Timeline</p>
+        <details ref={timelineRef} className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
+          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Timeline</summary>
           <div className="mt-6 space-y-5">
             {artifact.timeline.map((event) => (
               <div key={event.id} className="grid gap-2 border-b border-[rgba(229,226,220,0.68)] pb-5 sm:grid-cols-[10rem_1fr]">
@@ -141,10 +141,10 @@ export default function ArtifactView() {
               </div>
             ))}
           </div>
-        </section>
+        </details>
 
-        <section className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
-          <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Observations</p>
+        <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
+          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Observations</summary>
           {artifact.observations.length ? (
             <div className="mt-6 space-y-4">
               {artifact.observations.map((observation) => (
@@ -157,7 +157,16 @@ export default function ArtifactView() {
           ) : (
             <p className="mt-6 text-sm text-[var(--capsule-ash)]">No observations added.</p>
           )}
-        </section>
+        </details>
+
+        {artifact.ai && (
+          <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
+            <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Technical Metadata</summary>
+            <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
+              {artifact.ai.provider} / {artifact.ai.model} / {artifact.ai.usedFallback ? "structured generator" : "vision"}
+            </p>
+          </details>
+        )}
       </section>
     </main>
   );

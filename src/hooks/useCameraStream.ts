@@ -52,7 +52,7 @@ export function useCameraStream({ enabled, facingMode = "environment" }: UseCame
         const stream = await navigator.mediaDevices.getUserMedia(fallbackCameraConstraints);
         await attachStream(stream);
       } catch (fallbackError) {
-        const mapped = getCameraErrorMessage(primaryError || fallbackError);
+        const mapped = getCameraErrorMessage((primaryError || fallbackError) as Error);
         setError(mapped.message);
         setStatus(mapped.kind === "unsupported" ? "unsupported" : "error");
       }

@@ -15,7 +15,7 @@ const inferMaterials = (objectName) => {
   if (name.includes("key")) return ["metal", "plastic"];
   if (name.includes("mug")) return ["ceramic"];
   if (name.includes("shirt") || name.includes("clothing") || name.includes("jacket")) return ["fabric", "thread"];
-  return ["object material unresolved"];
+  return ["Material not classified."];
 };
 
 const inferClassification = (input) => {
@@ -49,10 +49,10 @@ export const generateFallbackArtifactPayload = (input) => {
     category: "object",
     classification,
     material,
-    condition: livingSubject ? "present, alert, source-captured" : hasSpecimen ? "Object Field locked, specimen preserved" : "source-captured, Object Field pending",
+    condition: livingSubject ? "present, alert, source-captured" : hasSpecimen ? "captured for preservation" : "captured for preservation",
     visibleDetails: hasSpecimen
-      ? ["selected specimen region", "source capture retained as provenance", livingSubject ? "domestic presence retained cautiously" : "user context preserved with specimen"]
-      : ["source capture retained as provenance", "Object Field pending", livingSubject ? "domestic presence retained cautiously" : "user context retained"],
+      ? ["selected specimen evidence retained", "source capture retained as provenance", livingSubject ? "domestic presence retained cautiously" : "surface details pending closer analysis"]
+      : ["source capture retained as provenance", livingSubject ? "domestic presence retained cautiously" : "surface details pending closer analysis"],
     emotionalHypothesis: livingSubject ? "The subject appears connected to a domestic continuity moment." : "The artifact appears connected to the moment the user chose to preserve it.",
     essence: createEssence(input),
     continuityScore,

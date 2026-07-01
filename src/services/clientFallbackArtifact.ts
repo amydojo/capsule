@@ -26,11 +26,11 @@ const inferMaterials = (objectName: string) => {
   if (name.includes("key")) return ["metal", "plastic"];
   if (name.includes("mug")) return ["ceramic"];
   if (name.includes("shirt") || name.includes("clothing") || name.includes("jacket")) return ["fabric", "thread"];
-  return ["object material unresolved"];
+  return ["Material not classified."];
 };
 
 const inferClassification = (input: CaptureInput) => {
-  const text = `${input.objectName} ${input.whyNow} ${input.futureMemory}`.toLowerCase();
+  const text = `${input.objectName || "Object"} ${input.whyNow || ""} ${input.futureMemory || ""}`.toLowerCase();
   if (/cat|dog|pet|remy|animal|companion/.test(text)) return "domestic presence record";
   if (/first|launch|start|beginning|idea|build|origin/.test(text)) return "origin artifact";
   if (/order|receipt|label|proof/.test(text)) return "transaction artifact";
@@ -39,15 +39,15 @@ const inferClassification = (input: CaptureInput) => {
 };
 
 const createEssence = (input: CaptureInput) => {
-  const source = input.futureMemory.trim() || input.whyNow.trim();
+  const source = input.futureMemory?.trim() || input.whyNow?.trim() || "";
   const cleaned = source.replace(/[.!?]+$/g, "").toLowerCase();
   const words = cleaned.split(/\s+/).filter(Boolean).slice(0, 16).join(" ");
   return words || "an ordinary object held in continuity.";
 };
 
 const createGeneratedPayload = (input: CaptureInput): GeneratedArtifactPayload => {
-  const objectName = input.objectName.trim() || "ordinary object";
-  const specificity = `${input.whyNow} ${input.futureMemory}`.trim().length;
+  const objectName = input.objectName?.trim() || "Object";
+  const specificity = `${input.whyNow || ""} ${input.futureMemory || ""}`.trim().length;
   const materials = inferMaterials(objectName);
   const classification = inferClassification(input);
   const score = Math.min(96, Math.max(72, specificity > 110 ? 93 : specificity > 56 ? 88 : 78));
@@ -61,10 +61,10 @@ const createGeneratedPayload = (input: CaptureInput): GeneratedArtifactPayload =
     category: "object",
     classification,
     material: materials,
-    condition: livingSubject ? "present, alert, source-captured" : hasSpecimen ? "Object Field locked, specimen preserved" : "source-captured, Object Field pending",
+    condition: livingSubject ? "present, alert, source-captured" : hasSpecimen ? "captured for preservation" : "captured for preservation",
     visibleDetails: hasSpecimen
-      ? ["selected specimen region", "source capture retained as provenance", livingSubject ? "domestic presence retained cautiously" : "user context preserved with specimen"]
-      : ["source capture retained as provenance", "Object Field pending", livingSubject ? "domestic presence retained cautiously" : "user context retained"],
+      ? ["selected specimen evidence retained", "source capture retained as provenance", livingSubject ? "domestic presence retained cautiously" : "surface details pending closer analysis"]
+      : ["source capture retained as provenance", livingSubject ? "domestic presence retained cautiously" : "surface details pending closer analysis"],
     emotionalHypothesis: livingSubject ? "The subject appears connected to a domestic continuity moment." : "The artifact appears connected to the moment the user chose to preserve it.",
     essence: createEssence(input),
     continuityScore: score,
@@ -89,7 +89,7 @@ export const generateClientFallbackArtifact = (input: CaptureInput): Artifact =>
     id: createFossilId(),
     ...generated,
     capturePoint: input.capturePoint,
-    origin: input.origin?.trim() || "unspecified origin",
+    origin: input.origin?.trim() || "field capture",
     preservationState: "active",
     currentStage: "preserved",
     imageDataUrl: specimenImage,
@@ -105,15 +105,15 @@ export const generateClientFallbackArtifact = (input: CaptureInput): Artifact =>
       {
         id: createId("evt"),
         stage: "created",
-        label: "Artifact generated",
-        description: "Local fallback generated a structured artifact record.",
+        label: "Artifact record created",
+        description: "Artifact record created.",
         date: now,
       },
       {
         id: createId("evt"),
         stage: "preserved",
         label: "Object Preserved",
-        description: "Preservation Chamber completed local continuity mapping.",
+        description: "Preservation Chamber completed continuity mapping.",
         date: now,
       },
     ],

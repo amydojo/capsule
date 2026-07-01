@@ -14,7 +14,7 @@ export default function MetadataTable({ artifact, preservationState = artifact.p
         ? `assisted object field / ${Math.round(artifact.extraction.confidence * 100)}%`
       : artifact.extraction.method === "simulated-isolation"
         ? `simulated isolation / ${Math.round(artifact.extraction.confidence * 100)}%`
-        : "fallback extraction"
+        : "field preserved"
     : undefined;
 
   const rows = [
@@ -34,7 +34,7 @@ export default function MetadataTable({ artifact, preservationState = artifact.p
         </div>
       ))}
       <div className="grid gap-3 border-b border-[var(--capsule-line)] py-5 sm:grid-cols-[13rem_1fr]">
-        <dt className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Continuity Score</dt>
+        <dt className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Continuity</dt>
         <dd><ContinuityBar value={artifact.continuityScore} /></dd>
       </div>
       <div className="grid gap-3 border-b border-[var(--capsule-line)] py-5 sm:grid-cols-[13rem_1fr]">

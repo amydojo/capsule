@@ -35,7 +35,7 @@ const ArtifactRow = ({ artifact, linked = true }: { artifact: Artifact; linked?:
           </div>
         </div>
         <div>
-          <p className="mono-label mb-3 text-[0.58rem] text-[var(--capsule-ash-dim)]">Continuity Score</p>
+          <p className="mono-label mb-3 text-[0.58rem] text-[var(--capsule-ash-dim)]">Continuity</p>
           <ContinuityBar value={artifact.continuityScore} tone="dark" />
         </div>
       </div>

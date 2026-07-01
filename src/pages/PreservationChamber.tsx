@@ -55,6 +55,7 @@ export default function PreservationChamber() {
   } = usePreservationSession();
   const runRef = useRef<string | null>(null);
   const autoTimerRef = useRef<number | undefined>(undefined);
+  const artifactTimerRef = useRef<number | undefined>(undefined);
   const stageTimersRef = useRef<number[]>([]);
 
   const activeIndex = Math.max(0, preservationStages.indexOf(session.activeStage));
@@ -72,14 +73,14 @@ export default function PreservationChamber() {
 
   const chamberTitle = useMemo(() => {
     if (session.status === "error") return "Preservation Interrupted";
-    if (isComplete) return "Object Preserved";
+    if (isComplete) return "Artifact Created";
     if (isPreserving) return "Preserving Object";
     return "Begin Preservation";
   }, [isComplete, isPreserving, session.status]);
 
   const stateCopy = useMemo(() => {
     if (session.status === "error") return "Could not complete artifact generation.";
-    if (isComplete) return "Continuity profile stabilized.";
+    if (isComplete) return "Object preserved.";
     if (isPreserving) return statusText[session.activeStage];
     if (activeInput) return "Object intake received. Chamber ready.";
     return "Capture an object to begin preservation.";
@@ -132,8 +133,21 @@ export default function PreservationChamber() {
   useEffect(() => {
     return () => {
       stageTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+      if (artifactTimerRef.current) window.clearTimeout(artifactTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isComplete || !session.artifact) return;
+    if (artifactTimerRef.current) window.clearTimeout(artifactTimerRef.current);
+    artifactTimerRef.current = window.setTimeout(() => {
+      navigate(`/artifact/${session.artifact?.id}`);
+    }, 1100);
+
+    return () => {
+      if (artifactTimerRef.current) window.clearTimeout(artifactTimerRef.current);
+    };
+  }, [isComplete, navigate, session.artifact]);
 
   const beginDemo = () => {
     const demoInput = createDemoInput();
@@ -204,7 +218,7 @@ export default function PreservationChamber() {
               </div>
             </div>
           )}
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+          <div className="sticky bottom-0 z-30 -mx-4 mt-7 flex flex-wrap items-center justify-center gap-3 border-t border-[var(--capsule-line-dark)] bg-[rgba(13,14,16,0.88)] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
             {!hasCapture && (
               <>
                 <button onClick={() => navigate("/capture")} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
@@ -215,11 +229,7 @@ export default function PreservationChamber() {
                 </button>
               </>
             )}
-            {activeInput && session.status === "intake" && (
-              <button onClick={() => void runPreservation(activeInput, session.id)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-                Begin Preservation
-              </button>
-            )}
+            {activeInput && session.status === "intake" && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preparing Chamber...</button>}
             {isPreserving && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preserving Object...</button>}
             {isComplete && session.artifact && (
               <button onClick={() => navigate(`/artifact/${session.artifact?.id}`)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">

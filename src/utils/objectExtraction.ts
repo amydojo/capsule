@@ -70,7 +70,7 @@ export const validateBoundary = (boundary: NormalizedBoundary): { ok: true } | {
     return { ok: false, message: "Object field coordinates are invalid." };
   }
   if (boundary.width < MIN_BOUNDARY_SIZE || boundary.height < MIN_BOUNDARY_SIZE) {
-    return { ok: false, message: "Lock a larger Object Field." };
+    return { ok: false, message: "Select a larger object field." };
   }
   if (boundary.x < 0 || boundary.y < 0 || boundary.x + boundary.width > 1 || boundary.y + boundary.height > 1) {
     return { ok: false, message: "Object field exceeded the source capture." };
@@ -108,7 +108,7 @@ export const extractSpecimenFromImage = async ({
   const sourceWidth = Math.max(1, Math.min(image.width - sourceX, Math.round(clamped.width * image.width)));
   const sourceHeight = Math.max(1, Math.min(image.height - sourceY, Math.round(clamped.height * image.height)));
 
-  if (sourceWidth < 80 || sourceHeight < 80) throw new Error("Lock a larger Object Field.");
+  if (sourceWidth < 80 || sourceHeight < 80) throw new Error("Select a larger object field.");
 
   const scale = Math.min(1, outputMaxWidth / sourceWidth, outputMaxHeight / sourceHeight);
   const outputWidth = Math.max(1, Math.round(sourceWidth * scale));

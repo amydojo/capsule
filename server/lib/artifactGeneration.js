@@ -46,13 +46,13 @@ const buildArtifact = (generated, input, ai) => {
       }
     : input.specimenImageDataUrl
       ? { method: "simulated-isolation", confidence: 0.62, warnings: [] }
-      : { method: "fallback", confidence: 0.42, warnings: ["Object boundary was not supplied."] };
+      : { method: "fallback", confidence: 0.42, warnings: ["Object field was not supplied."] };
 
   const artifact = {
     id: createFossilId(),
     ...generated,
     capturePoint: input.capturePoint,
-    origin: input.origin?.trim() || "unspecified origin",
+    origin: input.origin?.trim() || "field capture",
     preservationState: "active",
     currentStage: "preserved",
     imageDataUrl: specimenImage,
@@ -68,8 +68,8 @@ const buildArtifact = (generated, input, ai) => {
       {
         id: createEventId(),
         stage: "created",
-        label: "Artifact generated",
-        description: ai.usedFallback ? "Fallback generator produced a structured artifact record." : "Vision model produced a structured artifact record.",
+        label: "Artifact record created",
+        description: "Artifact record created.",
         date: now,
       },
       {
