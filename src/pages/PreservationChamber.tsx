@@ -6,6 +6,7 @@ import PreservationStageLine from "../components/PreservationStageLine";
 import ScanChecklist from "../components/ScanChecklist";
 import SpecimenStage from "../components/SpecimenStage";
 import TopBar from "../components/TopBar";
+import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { usePreservationSession } from "../context/PreservationSessionContext";
 import { primaryArtifact } from "../data/artifacts";
 import { generateArtifact } from "../services/artifactApi";
@@ -24,29 +25,10 @@ const statusText: Record<PreservationStage, string> = {
   sealed: "Artifact sealed.",
 };
 
-const sampleNotebookDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><rect width="640" height="480" fill="#f7f6f2"/><g transform="translate(170 92) rotate(-4 150 150)"><rect x="22" y="22" width="288" height="300" rx="18" fill="#eadfce" stroke="#252525" stroke-opacity=".22"/><rect x="42" y="42" width="288" height="300" rx="18" fill="#f4eadb" stroke="#252525" stroke-opacity=".22"/><line x1="112" y1="42" x2="112" y2="342" stroke="#252525" stroke-opacity=".18"/><line x1="152" y1="112" x2="282" y2="112" stroke="#252525" stroke-opacity=".16"/><line x1="152" y1="152" x2="266" y2="152" stroke="#252525" stroke-opacity=".13"/><line x1="152" y1="192" x2="248" y2="192" stroke="#252525" stroke-opacity=".1"/><rect x="320" y="78" width="16" height="222" rx="8" fill="#17191c" fill-opacity=".86"/></g></svg>`,
-)}`;
-
-const createDemoInput = (): CaptureInput => ({
-  imageDataUrl: sampleNotebookDataUrl,
-  sourceImageDataUrl: sampleNotebookDataUrl,
-  specimenImageDataUrl: sampleNotebookDataUrl,
-  thumbnailDataUrl: sampleNotebookDataUrl,
-  objectBoundary: { x: 0.14, y: 0.14, width: 0.72, height: 0.72, unit: "normalized" },
-  extraction: { method: "manual-object-field", confidence: 0.91, warnings: [], createdAt: new Date().toISOString() },
-  objectName: "field notebook",
-  whyNow: "The first working Capsule prototype is becoming real.",
-  futureMemory: "The first page where Capsule stopped being theoretical.",
-  origin: "desk / afternoon / glendora, ca",
-  capturePoint: "Jun 30, 2026, 1:42 PM",
-});
-
 export default function PreservationChamber() {
   const navigate = useNavigate();
   const {
     session,
-    startCapture,
     beginPreservation,
     setStageProgress,
     completePreservation,
@@ -75,15 +57,15 @@ export default function PreservationChamber() {
     if (session.status === "error") return "Preservation Interrupted";
     if (isComplete) return "Artifact Created";
     if (isPreserving) return "Preserving Object";
-    return "Begin Preservation";
+    return "Preserving Object";
   }, [isComplete, isPreserving, session.status]);
 
   const stateCopy = useMemo(() => {
     if (session.status === "error") return "Could not complete artifact generation.";
     if (isComplete) return "Object preserved.";
     if (isPreserving) return statusText[session.activeStage];
-    if (activeInput) return "Object intake received. Chamber ready.";
-    return "Capture an object to begin preservation.";
+    if (activeInput) return "Object intake received. Preservation starting.";
+    return "No active preservation.";
   }, [activeInput, isComplete, isPreserving, session.activeStage, session.status]);
 
   const runPreservation = useCallback(
@@ -141,7 +123,7 @@ export default function PreservationChamber() {
     if (!isComplete || !session.artifact) return;
     if (artifactTimerRef.current) window.clearTimeout(artifactTimerRef.current);
     artifactTimerRef.current = window.setTimeout(() => {
-      navigate(`/artifact/${session.artifact?.id}`);
+      if (session.artifact) navigate(getArtifactRoute(session.artifact.id));
     }, 1100);
 
     return () => {
@@ -149,17 +131,30 @@ export default function PreservationChamber() {
     };
   }, [isComplete, navigate, session.artifact]);
 
-  const beginDemo = () => {
-    const demoInput = createDemoInput();
-    const next = startCapture(demoInput);
-    window.setTimeout(() => {
-      void runPreservation(demoInput, next.id);
-    }, 250);
-  };
+  if (!hasCapture) {
+    return (
+      <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+        <TopBar fossilId={primaryArtifact.id} tone="dark" contextLabel="PRESERVING OBJECT" />
+        <section className="mx-auto flex min-h-[70dvh] w-full max-w-3xl flex-col items-center justify-center px-5 text-center sm:px-8">
+          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">PRESERVING OBJECT</p>
+          <h1 className="mt-4 text-3xl font-semibold uppercase tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">No active preservation.</h1>
+          <p className="mt-4 max-w-md text-sm leading-6 text-[var(--capsule-ash-dim)]">Capture an object to begin preservation, or return to the Vault.</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <button onClick={() => navigate(ROUTES.vault)} className="device-control-button px-7 py-3.5 text-sm font-medium">
+              Go to Vault
+            </button>
+            <button onClick={() => navigate(ROUTES.capture)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
+              Capture Object
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
-    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-12">
-      <TopBar fossilId={session.artifact?.id || primaryArtifact.id} tone="dark" />
+    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+      <TopBar fossilId={session.artifact?.id || primaryArtifact.id} tone="dark" contextLabel="PRESERVING OBJECT" />
       <section className="mx-auto grid w-full max-w-[92rem] gap-5 px-4 pb-10 pt-1 sm:px-8 lg:grid-cols-[14rem_minmax(0,1fr)_15rem] lg:px-10">
         <motion.aside
           initial={{ opacity: 0, y: 16 }}
@@ -219,20 +214,10 @@ export default function PreservationChamber() {
             </div>
           )}
           <div className="sticky bottom-0 z-30 -mx-4 mt-7 flex flex-wrap items-center justify-center gap-3 border-t border-[var(--capsule-line-dark)] bg-[rgba(13,14,16,0.88)] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
-            {!hasCapture && (
-              <>
-                <button onClick={() => navigate("/capture")} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-                  Capture Object
-                </button>
-                <button onClick={beginDemo} className="device-control-button px-7 py-3.5 text-sm font-medium">
-                  Begin Demo Preservation
-                </button>
-              </>
-            )}
-            {activeInput && session.status === "intake" && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preparing Chamber...</button>}
+            {activeInput && session.status === "intake" && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preparing Object...</button>}
             {isPreserving && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preserving Object...</button>}
             {isComplete && session.artifact && (
-              <button onClick={() => navigate(`/artifact/${session.artifact?.id}`)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
+              <button onClick={() => session.artifact && navigate(getArtifactRoute(session.artifact.id))} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
                 Open Artifact
               </button>
             )}
@@ -241,8 +226,8 @@ export default function PreservationChamber() {
                 <button onClick={() => void runPreservation(activeInput, session.id)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
                   Retry Preservation
                 </button>
-                <button onClick={() => navigate("/capture")} className="device-control-button px-7 py-3.5 text-sm font-medium">
-                  Return to Capture Point
+                <button onClick={() => navigate(ROUTES.capture)} className="device-control-button px-7 py-3.5 text-sm font-medium">
+                  Return to Capture
                 </button>
               </>
             )}

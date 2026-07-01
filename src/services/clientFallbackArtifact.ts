@@ -113,7 +113,7 @@ export const generateClientFallbackArtifact = (input: CaptureInput): Artifact =>
         id: createId("evt"),
         stage: "preserved",
         label: "Object Preserved",
-        description: "Preservation Chamber completed continuity mapping.",
+        description: "Preservation transition completed continuity mapping.",
         date: now,
       },
     ],

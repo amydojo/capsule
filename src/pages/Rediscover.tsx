@@ -4,6 +4,7 @@ import BottomNav from "../components/BottomNav";
 import SpecimenNotebook from "../components/SpecimenNotebook";
 import SpecimenStage from "../components/SpecimenStage";
 import TopBar from "../components/TopBar";
+import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { primaryArtifact } from "../data/artifacts";
 import { addObservation, getArtifacts, markRediscovered } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
@@ -51,7 +52,7 @@ export default function Rediscover() {
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-[var(--capsule-mineral-olive)] shadow-[0_0_0_6px_var(--capsule-mineral-olive-soft)]" />
-            <span className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">RESURFACED</span>
+            <span className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">REDISCOVER</span>
           </div>
           <h1 className="mt-5 text-3xl font-semibold tracking-[0.01em] text-[var(--capsule-bone)] sm:text-5xl">{artifact.title}</h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-[var(--capsule-ash-dim)]">{artifact.essence}</p>
@@ -94,7 +95,7 @@ export default function Rediscover() {
 
         <div className="mx-auto mt-7 flex max-w-4xl flex-wrap gap-3">
           <button
-            onClick={() => (isStored ? navigate(`/artifact/${artifact.id}`) : navigate("/archive"))}
+            onClick={() => (isStored ? navigate(getArtifactRoute(artifact.id)) : navigate(ROUTES.vault))}
             className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-5 py-3 text-sm font-medium text-[var(--capsule-graphite-black)]"
           >
             Open Artifact

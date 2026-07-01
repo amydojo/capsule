@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import ArtifactActions from "../components/ArtifactActions";
+import BottomNav from "../components/BottomNav";
 import MetadataTable from "../components/MetadataTable";
 import SourceCapturePreview from "../components/SourceCapturePreview";
 import SpecimenStage from "../components/SpecimenStage";
 import TopBar from "../components/TopBar";
+import { ROUTES } from "../constants/navigation";
 import { addObservation, getArtifactById, sealArtifact } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
 import { getSpecimenImageDataUrl } from "../utils/artifactImage";
@@ -20,7 +22,6 @@ const polishVisibleDetail = (detail: string) => {
 
 export default function ArtifactView() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const timelineRef = useRef<HTMLDetailsElement>(null);
   const [artifact, setArtifact] = useState<Artifact | undefined>(() => (id ? getArtifactById(id) : undefined));
   const [showObservationInput, setShowObservationInput] = useState(false);
@@ -32,14 +33,14 @@ export default function ArtifactView() {
 
   if (!artifact) {
     return (
-      <main className="record-shell min-h-screen pb-16">
+      <main className="record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
         <TopBar fossilId={id || "CF-00000"} contextLabel="OBJECT RECORD" />
         <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 text-center">
           <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Artifact not found.</p>
           <h1 className="mt-4 text-4xl font-semibold uppercase tracking-[0.04em]">No preserved object here</h1>
-          <button onClick={() => navigate("/archive")} className="primary-button mt-8 px-6 py-3 text-sm font-medium">
-            Return to Archive
-          </button>
+          <Link to={ROUTES.vault} className="primary-button mt-8 inline-flex px-6 py-3 text-sm font-medium">
+            Return to Vault
+          </Link>
         </section>
       </main>
     );
@@ -66,7 +67,7 @@ export default function ArtifactView() {
   };
 
   return (
-    <main className="record-shell min-h-screen pb-16">
+    <main className="record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
       <TopBar fossilId={artifact.id} contextLabel="OBJECT RECORD" />
       <section className="mx-auto w-full max-w-[84rem] px-4 pb-20 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-[55rem] pb-7 pt-2 sm:pb-10">
@@ -167,6 +168,8 @@ export default function ArtifactView() {
             </p>
           </details>
         )}
+
+        <BottomNav />
       </section>
     </main>
   );

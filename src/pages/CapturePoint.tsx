@@ -8,6 +8,7 @@ import CaptureModeToggle from "../components/CaptureModeToggle";
 import MobileCaptureCTA from "../components/MobileCaptureCTA";
 import ObjectSelector from "../components/ObjectSelector";
 import TopBar from "../components/TopBar";
+import { ROUTES } from "../constants/navigation";
 import { usePreservationSession } from "../context/PreservationSessionContext";
 import { primaryArtifact } from "../data/artifacts";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -177,7 +178,7 @@ export default function CapturePoint() {
     };
 
     startCapture(input);
-    navigate("/chamber");
+    navigate(ROUTES.chamber);
   };
 
   return (

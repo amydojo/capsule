@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 import ContinuityBar from "../components/ContinuityBar";
 import SpecimenStage from "../components/SpecimenStage";
 import TopBar from "../components/TopBar";
+import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { artifacts as sampleArtifacts, primaryArtifact } from "../data/artifacts";
 import { getArtifacts } from "../services/artifactStorage";
 import type { Artifact, ArtifactLifecycleStatus } from "../types/artifact";
@@ -43,7 +44,7 @@ const ArtifactRow = ({ artifact, linked = true }: { artifact: Artifact; linked?:
   );
 
   return linked ? (
-    <Link to={`/artifact/${artifact.id}`} className="block">
+    <Link to={getArtifactRoute(artifact.id)} className="block">
       {content}
     </Link>
   ) : (
@@ -52,7 +53,6 @@ const ArtifactRow = ({ artifact, linked = true }: { artifact: Artifact; linked?:
 };
 
 export default function Archive() {
-  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ArtifactLifecycleStatus | "all">("all");
   const generatedArtifacts = getArtifacts();
@@ -70,17 +70,24 @@ export default function Archive() {
 
   const featuredArtifact = filteredArtifacts[0];
   const indexArtifacts = featuredArtifact ? filteredArtifacts.slice(1) : filteredArtifacts;
+  const objectCount = generatedArtifacts.length;
+  const objectCountLabel = `${objectCount} ${objectCount === 1 ? "object" : "objects"} preserved`;
 
   return (
-    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-12">
+    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
       <TopBar fossilId={generatedArtifacts[0]?.id || primaryArtifact.id} tone="dark" />
       <section className="mx-auto w-full max-w-[78rem] px-5 sm:px-8 lg:px-10">
-        <div className="mb-8 flex flex-col justify-between gap-4 border-b border-[var(--capsule-line-dark)] pb-7 sm:flex-row sm:items-end">
+        <div className="mb-8 flex flex-col justify-between gap-5 border-b border-[var(--capsule-line-dark)] pb-7 sm:flex-row sm:items-end">
           <div>
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">ARCHIVE</p>
-            <h1 className="mt-2 text-4xl font-semibold uppercase tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">Vault</h1>
+            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">Preserved artifacts</p>
+            <h1 className="mt-2 text-4xl font-semibold uppercase tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">VAULT</h1>
           </div>
-          <p className="max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">{generatedArtifacts.length} preserved objects. Documented continuity.</p>
+          <div className="flex flex-col gap-3 sm:items-end">
+            <p className="max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">{objectCountLabel}</p>
+            <Link to={ROUTES.capture} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--capsule-bone)] px-6 py-3 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
+              Capture Object
+            </Link>
+          </div>
         </div>
 
         {generatedArtifacts.length > 0 && (
@@ -119,15 +126,16 @@ export default function Archive() {
 
         {generatedArtifacts.length === 0 ? (
           <div className="rounded-[1.7rem] border border-[var(--capsule-line-dark)] bg-white/[0.045] p-10 text-center">
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">No preserved objects yet.</p>
-            <button onClick={() => navigate("/capture")} className="mt-6 min-h-11 rounded-full bg-[var(--capsule-bone)] px-6 py-3 text-sm font-medium text-[var(--capsule-graphite-black)]">
+            <p className="text-lg font-semibold text-[var(--capsule-bone)]">No artifacts preserved yet.</p>
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">Capture an object to begin the Vault.</p>
+            <Link to={ROUTES.capture} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--capsule-bone)] px-6 py-3 text-sm font-semibold text-[var(--capsule-graphite-black)]">
               Capture Object
-            </button>
+            </Link>
           </div>
         ) : (
           <div className="space-y-4">
             {featuredArtifact && (
-              <Link to={`/artifact/${featuredArtifact.id}`} className="block rounded-[2rem] border border-[rgba(154,149,86,0.45)] bg-[rgba(154,149,86,0.08)] p-3 shadow-[0_26px_78px_rgba(0,0,0,0.28)]">
+              <Link to={getArtifactRoute(featuredArtifact.id)} className="block rounded-[2rem] border border-[rgba(154,149,86,0.45)] bg-[rgba(154,149,86,0.08)] p-3 shadow-[0_26px_78px_rgba(0,0,0,0.28)]">
                 <p className="mono-label mb-3 px-2 text-[0.58rem] text-[var(--capsule-mineral-olive-bright)]">Featured Artifact</p>
                 <ArtifactRow artifact={featuredArtifact} linked={false} />
                 <div className="mt-4 flex justify-center gap-2">
