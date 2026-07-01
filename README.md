@@ -30,10 +30,23 @@ Backend: `http://localhost:8787`
 
 ```bash
 npm run dev       # Vite frontend only
+npm run dev:host  # Vite frontend on your local network
 npm run server    # local artifact generation backend only
 npm run dev:all   # frontend and backend together
+npm run dev:all:host # frontend on local network and backend together
 npm run build     # TypeScript and production build
 ```
+
+## Testing on Phone
+
+Local network testing:
+
+1. Run the backend: `npm run server`
+2. Run the frontend for network access: `npm run dev:host`
+3. Find your computer IP address.
+4. Open `http://YOUR_LOCAL_IP:5174` or the Vite port shown in the terminal.
+
+Mobile camera access may not work over plain HTTP except on `localhost`. For reliable phone camera testing, use an HTTPS preview or tunnel such as Vercel Preview, Netlify Preview, Cloudflare Tunnel, ngrok, or localtunnel.
 
 ## AI Generation
 
