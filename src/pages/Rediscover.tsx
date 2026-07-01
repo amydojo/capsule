@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
+import PreservationField from "../components/PreservationField";
 import SpecimenNotebook from "../components/SpecimenNotebook";
-import SpecimenStage from "../components/SpecimenStage";
 import TopBar from "../components/TopBar";
 import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { primaryArtifact } from "../data/artifacts";
 import { addObservation, getArtifacts, markRediscovered } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
-import { getArtifactThumbnailDataUrl, getSpecimenImageDataUrl, hasObjectFieldPending } from "../utils/artifactImage";
+import { getArtifactHeroImage, getArtifactSourceImage, hasObjectFieldPending } from "../utils/artifactImage";
 
 const pickRediscoveryArtifact = () => {
   const stored = getArtifacts();
@@ -28,8 +28,8 @@ export default function Rediscover() {
   const navigate = useNavigate();
   const [artifact, setArtifact] = useState<Artifact>(() => pickRediscoveryArtifact());
   const isStored = Boolean(getArtifacts().find((item) => item.id === artifact.id));
-  const specimenImage = getSpecimenImageDataUrl(artifact);
-  const sourceImage = artifact.sourceImageDataUrl || getArtifactThumbnailDataUrl(artifact) || specimenImage;
+  const heroImage = getArtifactHeroImage(artifact);
+  const sourceImage = getArtifactSourceImage(artifact);
 
   const handleRediscover = () => {
     if (!isStored) return;
@@ -58,7 +58,7 @@ export default function Rediscover() {
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-[var(--capsule-ash-dim)]">{artifact.essence}</p>
         </div>
 
-        <SpecimenStage mode="artifact" tone="dark" imageDataUrl={specimenImage} imageAlt={artifact.title} showIsolationChip={Boolean(specimenImage)} isolationLabel={artifact.extraction?.method === "manual-object-field" ? "Isolation: manual" : "Isolation: simulated"} />
+        <PreservationField mode="rediscover" imageDataUrl={heroImage} imageAlt={artifact.title} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
         {hasObjectFieldPending(artifact) && <p className="mt-4 text-center mono-label text-[0.62rem] text-[var(--capsule-ash-dim)]">Object field pending.</p>}
 
         <div className="mx-auto mt-9 flex max-w-4xl flex-col items-center gap-2 text-center">
@@ -81,11 +81,13 @@ export default function Rediscover() {
           </div>
           <div className="border-t border-[var(--capsule-line-dark)] pt-5">
             <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">NOW</p>
-            <div className="mt-5 flex min-h-40 items-center justify-center rounded-2xl border border-[rgba(101,112,255,0.24)] bg-white/[0.055]">
-              {specimenImage ? (
-                <img src={specimenImage} alt={`${artifact.title} specimen`} className="max-h-36 max-w-full rounded-xl object-contain" />
+            <div className="mt-5">
+              {heroImage ? (
+                <PreservationField mode="vault" imageDataUrl={heroImage} imageAlt={`${artifact.title} specimen`} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
               ) : (
-                <SpecimenNotebook small refined />
+                <div className="flex min-h-40 items-center justify-center rounded-2xl border border-[rgba(101,112,255,0.24)] bg-white/[0.055]">
+                  <SpecimenNotebook small refined />
+                </div>
               )}
             </div>
             <p className="mt-4 text-sm text-[var(--capsule-ash-dim)]">Specimen</p>

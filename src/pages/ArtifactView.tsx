@@ -4,13 +4,13 @@ import { Link, useParams } from "react-router-dom";
 import ArtifactActions from "../components/ArtifactActions";
 import BottomNav from "../components/BottomNav";
 import MetadataTable from "../components/MetadataTable";
+import PreservationField from "../components/PreservationField";
 import SourceCapturePreview from "../components/SourceCapturePreview";
-import SpecimenStage from "../components/SpecimenStage";
 import TopBar from "../components/TopBar";
 import { ROUTES } from "../constants/navigation";
 import { addObservation, getArtifactById, sealArtifact } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
-import { getSpecimenImageDataUrl } from "../utils/artifactImage";
+import { getArtifactHeroImage, getArtifactSourceImage } from "../utils/artifactImage";
 
 const polishVisibleDetail = (detail: string) => {
   const normalized = detail.toLowerCase();
@@ -47,10 +47,18 @@ export default function ArtifactView() {
   }
 
   const sealed = artifact.preservationState === "sealed";
-  const specimenImage = getSpecimenImageDataUrl(artifact);
-  const sourceImage = artifact.sourceImageDataUrl && artifact.sourceImageDataUrl !== specimenImage ? artifact.sourceImageDataUrl : undefined;
-  const isolationLabel = artifact.extraction?.method === "manual-object-field" ? "Isolation: manual" : "Isolation: simulated";
+  const heroImage = getArtifactHeroImage(artifact);
+  const sourceImage = getArtifactSourceImage(artifact);
+  const provenanceImage = sourceImage && sourceImage !== heroImage ? sourceImage : undefined;
   const visibleDetails = artifact.visibleDetails.map(polishVisibleDetail);
+  const renderLabel =
+    artifact.render?.pristineStatus === "success" && artifact.pristineSpecimenDataUrl
+      ? "Pristine specimen"
+      : artifact.render?.localRenderStatus === "success" && artifact.artifactRenderDataUrl
+        ? "Preserved render"
+        : artifact.specimenImageDataUrl
+          ? "Object field render"
+          : undefined;
 
   const handleSeal = () => {
     const updated = sealArtifact(artifact.id);
@@ -80,7 +88,7 @@ export default function ArtifactView() {
           <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--capsule-ash)] sm:mt-6 sm:text-xl sm:leading-9">{artifact.essence}</p>
         </div>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <SpecimenStage mode="artifact" tone="light" imageDataUrl={specimenImage} imageAlt={artifact.title} showIsolationChip={Boolean(specimenImage)} isolationLabel={isolationLabel} />
+          <PreservationField mode="record" imageDataUrl={heroImage} imageAlt={artifact.title} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
         </motion.div>
         <div className="mt-10 sm:mt-14">
           <ArtifactActions
@@ -127,7 +135,7 @@ export default function ArtifactView() {
           </div>
         </details>
 
-        {sourceImage && <SourceCapturePreview sourceImageDataUrl={sourceImage} title={artifact.title} />}
+        {provenanceImage && <SourceCapturePreview sourceImageDataUrl={provenanceImage} title={artifact.title} />}
 
         <details ref={timelineRef} className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
           <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Timeline</summary>
@@ -160,12 +168,19 @@ export default function ArtifactView() {
           )}
         </details>
 
-        {artifact.ai && (
+        {(artifact.ai || renderLabel) && (
           <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
             <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Technical Metadata</summary>
-            <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
-              {artifact.ai.provider} / {artifact.ai.model} / {artifact.ai.usedFallback ? "structured generator" : "vision"}
-            </p>
+            {renderLabel && (
+              <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
+                {renderLabel} / {artifact.render?.provider || "local"} / motion {artifact.render?.motionSeed || "unseeded"}
+              </p>
+            )}
+            {artifact.ai && (
+              <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
+                {artifact.ai.provider} / {artifact.ai.model} / {artifact.ai.usedFallback ? "structured generator" : "vision"}
+              </p>
+            )}
           </details>
         )}
 

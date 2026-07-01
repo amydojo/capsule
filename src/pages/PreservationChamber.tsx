@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ExtractionReadout from "../components/ExtractionReadout";
+import PreservationField from "../components/PreservationField";
 import PreservationStageLine from "../components/PreservationStageLine";
 import ScanChecklist from "../components/ScanChecklist";
 import SpecimenStage from "../components/SpecimenStage";
@@ -10,9 +11,10 @@ import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { usePreservationSession } from "../context/PreservationSessionContext";
 import { primaryArtifact } from "../data/artifacts";
 import { generateArtifact } from "../services/artifactApi";
+import { processSpecimenImages } from "../services/specimenProcessing";
 import type { PreservationStage } from "../types/artifact";
 import type { CaptureInput } from "../types/capture";
-import { getSpecimenImageDataUrl } from "../utils/artifactImage";
+import { getArtifactHeroImage } from "../utils/artifactImage";
 
 const preservationStages: PreservationStage[] = ["captured", "isolated", "analyzed", "traced", "preserved"];
 
@@ -42,7 +44,7 @@ export default function PreservationChamber() {
 
   const activeIndex = Math.max(0, preservationStages.indexOf(session.activeStage));
   const activeInput = session.input;
-  const chamberImage = session.artifact ? getSpecimenImageDataUrl(session.artifact) : activeInput?.specimenImageDataUrl || activeInput?.imageDataUrl || "";
+  const chamberImage = session.artifact ? getArtifactHeroImage(session.artifact) : activeInput?.specimenImageDataUrl || activeInput?.imageDataUrl || "";
   const objectLabel = session.artifact?.commonName || activeInput?.objectName || primaryArtifact.commonName;
   const extraction = session.artifact?.extraction || activeInput?.extraction;
   const hasManualExtraction = extraction?.method === "manual-object-field" || Boolean(session.artifact?.objectBoundary || activeInput?.objectBoundary);
@@ -84,7 +86,9 @@ export default function PreservationChamber() {
 
       try {
         const minDuration = new Promise((resolve) => window.setTimeout(resolve, 3600));
-        const artifactPromise = generateArtifact(input);
+        const artifactPromise = generateArtifact(input).then((artifact) =>
+          processSpecimenImages(artifact, input).catch(() => artifact),
+        );
         const [artifact] = await Promise.all([artifactPromise, minDuration]);
         stageTimers.forEach((timer) => window.clearTimeout(timer));
         stageTimersRef.current = [];
@@ -187,15 +191,19 @@ export default function PreservationChamber() {
               {isComplete ? "Specimen Render" : isPreserving ? session.activeStage : "intake"}
             </span>
           </div>
-          <SpecimenStage
-            tone="dark"
-            showScanLine={isPreserving}
-            showMarkers
-            imageDataUrl={chamberImage}
-            imageAlt={objectLabel}
-            showIsolationChip={Boolean(chamberImage)}
-            isolationLabel={hasManualExtraction ? "Isolation: manual" : "Isolation: simulated"}
-          />
+          {isComplete && session.artifact ? (
+            <PreservationField mode="chamber" imageDataUrl={chamberImage} imageAlt={objectLabel} motionSeed={session.artifact.render?.motionSeed} render={session.artifact.render} />
+          ) : (
+            <SpecimenStage
+              tone="dark"
+              showScanLine={isPreserving}
+              showMarkers
+              imageDataUrl={chamberImage}
+              imageAlt={objectLabel}
+              showIsolationChip={Boolean(chamberImage)}
+              isolationLabel={hasManualExtraction ? "Isolation: manual" : "Isolation: simulated"}
+            />
+          )}
           <PreservationStageLine activeIndex={activeIndex} />
           <div className="mx-auto mt-5 max-w-2xl rounded-2xl border border-[var(--capsule-line-dark)] bg-white/[0.055] p-4 text-center lg:hidden">
             <p className="mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">PRESERVATION STATE</p>

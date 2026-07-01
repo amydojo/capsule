@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { generateArtifactFromInput, parseCaptureInput } from "./lib/artifactGeneration.js";
+import { renderPristineSpecimenFromPayload } from "./lib/specimenRender.js";
 
 dotenv.config({ path: new URL("./.env", import.meta.url).pathname });
 
@@ -28,6 +29,12 @@ app.post("/api/artifacts/generate", async (request, response) => {
   } catch {
     response.status(500).json({ error: "Preservation service could not generate an artifact." });
   }
+});
+
+app.post("/api/specimens/render", async (request, response) => {
+  const result = await renderPristineSpecimenFromPayload(request.body);
+  const statusCode = result.status === "failed" && result.reason === "specimenImageDataUrl is required." ? 400 : 200;
+  response.status(statusCode).json(result);
 });
 
 app.listen(port, () => {

@@ -4,6 +4,9 @@ export const CaptureInputSchema = z.object({
   imageDataUrl: z.string().startsWith("data:image/"),
   sourceImageDataUrl: z.string().startsWith("data:image/").optional(),
   specimenImageDataUrl: z.string().startsWith("data:image/").optional(),
+  isolatedSpecimenDataUrl: z.string().startsWith("data:image/").optional(),
+  pristineSpecimenDataUrl: z.string().startsWith("data:image/").optional(),
+  artifactRenderDataUrl: z.string().startsWith("data:image/").optional(),
   thumbnailDataUrl: z.string().startsWith("data:image/").optional(),
   objectBoundary: z
     .object({
@@ -58,6 +61,17 @@ const ArtifactExtractionSchema = z.preprocess((value) => {
   warning: z.string().optional(),
 }));
 
+export const ArtifactRenderMetadataSchema = z.object({
+  version: z.string().min(1),
+  method: z.enum(["openai-pristine-render", "background-removed", "specimen-crop", "local-preserved-render", "fallback-render"]),
+  isolationStatus: z.enum(["not_attempted", "success", "failed", "unavailable"]),
+  pristineStatus: z.enum(["not_attempted", "success", "failed", "unavailable"]),
+  localRenderStatus: z.enum(["not_attempted", "success", "failed"]),
+  motionSeed: z.string().min(1),
+  createdAt: z.string().min(1),
+  provider: z.enum(["openai", "local", "none"]).optional(),
+});
+
 export const ArtifactSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -75,14 +89,17 @@ export const ArtifactSchema = z.object({
   continuityScore: z.coerce.number().min(0).max(100),
   currentStage: z.enum(["captured", "isolated", "analyzed", "traced", "preserved", "sealed"]),
   imageDataUrl: z.string().min(1),
-  isolatedSpecimenDataUrl: z.string().optional(),
   sourceImageDataUrl: z.string().optional(),
   specimenImageDataUrl: z.string().optional(),
+  isolatedSpecimenDataUrl: z.string().optional(),
+  pristineSpecimenDataUrl: z.string().optional(),
+  artifactRenderDataUrl: z.string().optional(),
   thumbnailDataUrl: z.string().optional(),
   objectBoundary: z
     .object({ x: z.number(), y: z.number(), width: z.number(), height: z.number(), unit: z.literal("normalized") })
     .optional(),
   extraction: ArtifactExtractionSchema.optional(),
+  render: ArtifactRenderMetadataSchema.optional(),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
   observations: z.array(z.object({ id: z.string(), text: z.string(), createdAt: z.string() })),

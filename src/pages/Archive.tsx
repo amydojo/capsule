@@ -2,19 +2,19 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 import ContinuityBar from "../components/ContinuityBar";
-import SpecimenStage from "../components/SpecimenStage";
+import PreservationField from "../components/PreservationField";
 import TopBar from "../components/TopBar";
 import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { artifacts as sampleArtifacts, primaryArtifact } from "../data/artifacts";
 import { getArtifacts } from "../services/artifactStorage";
 import type { Artifact, ArtifactLifecycleStatus } from "../types/artifact";
-import { getArtifactThumbnailDataUrl, hasObjectFieldPending } from "../utils/artifactImage";
+import { getArtifactHeroImage, hasObjectFieldPending } from "../utils/artifactImage";
 
 const ArtifactRow = ({ artifact, linked = true }: { artifact: Artifact; linked?: boolean }) => {
-  const specimenImage = getArtifactThumbnailDataUrl(artifact);
+  const heroImage = getArtifactHeroImage(artifact);
   const content = (
     <article className="grid gap-5 rounded-[1.55rem] border border-[var(--capsule-line-dark)] bg-white/[0.045] p-3 transition hover:border-[rgba(154,149,86,0.45)] hover:bg-white/[0.07] sm:grid-cols-[15rem_1fr] sm:items-center">
-      <SpecimenStage mode="compact" tone="dark" imageDataUrl={specimenImage} imageAlt={artifact.title} />
+      <PreservationField mode="vault" imageDataUrl={heroImage} imageAlt={artifact.title} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
       <div className="grid gap-6 md:grid-cols-[1fr_13rem] md:items-center">
         <div>
           <p className="font-mono text-xs text-[var(--capsule-mineral-olive)]">{artifact.id}</p>

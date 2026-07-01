@@ -27,6 +27,24 @@ export type ArtifactExtraction = {
   warning?: string;
 };
 
+export type ArtifactRenderMethod =
+  | "openai-pristine-render"
+  | "background-removed"
+  | "specimen-crop"
+  | "local-preserved-render"
+  | "fallback-render";
+
+export type ArtifactRenderMetadata = {
+  version: string;
+  method: ArtifactRenderMethod;
+  isolationStatus: "not_attempted" | "success" | "failed" | "unavailable";
+  pristineStatus: "not_attempted" | "success" | "failed" | "unavailable";
+  localRenderStatus: "not_attempted" | "success" | "failed";
+  motionSeed: string;
+  createdAt: string;
+  provider?: "openai" | "local" | "none";
+};
+
 export type Artifact = {
   id: string;
   title: string;
@@ -44,12 +62,15 @@ export type Artifact = {
   continuityScore: number;
   currentStage: PreservationStage;
   imageDataUrl: string;
-  isolatedSpecimenDataUrl?: string;
   sourceImageDataUrl?: string;
   specimenImageDataUrl?: string;
+  isolatedSpecimenDataUrl?: string;
+  pristineSpecimenDataUrl?: string;
+  artifactRenderDataUrl?: string;
   thumbnailDataUrl?: string;
   objectBoundary?: ObjectBoundary;
   extraction?: ArtifactExtraction;
+  render?: ArtifactRenderMetadata;
   createdAt: string;
   updatedAt: string;
   observations: ArtifactObservation[];

@@ -5,6 +5,9 @@ export type CaptureInput = {
   imageDataUrl: string;
   sourceImageDataUrl?: string;
   specimenImageDataUrl?: string;
+  isolatedSpecimenDataUrl?: string;
+  pristineSpecimenDataUrl?: string;
+  artifactRenderDataUrl?: string;
   thumbnailDataUrl?: string;
   objectBoundary?: ObjectBoundary;
   extraction?: Omit<ExtractionResult, "specimenImageDataUrl" | "sourceImageDataUrl" | "objectBoundary">;
