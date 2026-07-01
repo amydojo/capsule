@@ -1,12 +1,32 @@
 :root {
-  --capsule-stone: #f7f6f2;
-  --capsule-stone-deep: #efede8;
+  --capsule-abyss-black: #0d0e10;
+  --capsule-graphite-black: #1a1b1e;
+  --capsule-panel-black: #111216;
+  --capsule-panel-soft: #18191d;
+
+  --capsule-bone: #f2efea;
+  --capsule-bone-soft: #faf8f2;
+  --capsule-paper-line: #ddd8ce;
+
+  --capsule-mineral-olive: #9a9556;
+  --capsule-mineral-olive-bright: #b8b06a;
+  --capsule-mineral-olive-soft: rgba(154, 149, 86, 0.22);
+
+  --capsule-spectrum-indigo: #2f3492;
+  --capsule-spectrum-indigo-bright: #6570ff;
+  --capsule-spectrum-indigo-soft: rgba(101, 112, 255, 0.22);
+  --capsule-spectrum-indigo-glow: rgba(101, 112, 255, 0.38);
+
+  --capsule-ash: #a7a39a;
+  --capsule-ash-dim: rgba(242, 239, 234, 0.48);
+  --capsule-line-dark: rgba(242, 239, 234, 0.11);
+  --capsule-line-light: rgba(26, 27, 30, 0.12);
+
+  --capsule-stone: var(--capsule-bone);
+  --capsule-stone-deep: #e8e4da;
   --capsule-surface: #ffffff;
-  --capsule-ash: #a8aaa7;
-  --capsule-graphite: #17191c;
-  --capsule-blue: #2f7ef7;
-  --capsule-glow: rgba(47, 126, 247, 0.16);
-  --capsule-blue-soft: #e2ecff;
-  --capsule-line: #e5e2dc;
-  --capsule-paper: #fffdfa;
+  --capsule-graphite: var(--capsule-graphite-black);
+  --capsule-glow: var(--capsule-spectrum-indigo-soft);
+  --capsule-line: var(--capsule-paper-line);
+  --capsule-paper: var(--capsule-bone-soft);
 }

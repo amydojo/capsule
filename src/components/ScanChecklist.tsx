@@ -15,18 +15,18 @@ const scanItems: Array<{ label: string; values: Record<ScanStatus, number>; text
 
 export default function ScanChecklist({ compact = false, status = "idle" }: ScanChecklistProps) {
   return (
-    <div className={`instrument-panel rounded-2xl p-5 ${compact ? "w-full" : ""}`}>
-      <p className="mono-label mb-5 text-[0.62rem] text-[var(--capsule-ash)]">Scan Checklist</p>
+    <div className={`instrument-card-dark rounded-2xl p-5 ${compact ? "w-full" : ""}`}>
+      <p className="mono-label mb-5 text-[0.62rem] text-[var(--capsule-ash-dim)]">Scan Checklist</p>
       <div className="space-y-4">
         {scanItems.map((item) => (
           <div key={item.label} className="space-y-2">
             <div className="flex items-center justify-between gap-4 text-xs">
-              <span className="text-[var(--capsule-ash)]">{item.label}</span>
-              <span className="font-mono text-[0.68rem] text-[var(--capsule-graphite)]">{item.text[status]}</span>
+              <span className="text-[var(--capsule-ash-dim)]">{item.label}</span>
+              <span className="font-mono text-[0.68rem] text-[var(--capsule-bone)]">{item.text[status]}</span>
             </div>
-            <div className="h-px w-full bg-[rgba(229,226,220,0.8)]">
+            <div className="h-px w-full bg-[var(--capsule-line-dark)]">
               <div
-                className="h-px bg-[var(--capsule-blue)] transition-all duration-700 ease-out"
+                className="h-px bg-[var(--capsule-spectrum-indigo-bright)] transition-all duration-700 ease-out"
                 style={{ width: `${item.values[status]}%` }}
               />
             </div>

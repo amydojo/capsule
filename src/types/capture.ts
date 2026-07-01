@@ -1,7 +1,13 @@
-import type { Artifact, PreservationStage } from "./artifact";
+import type { Artifact, ObjectBoundary, PreservationStage } from "./artifact";
+import type { ExtractionResult } from "./extraction";
 
 export type CaptureInput = {
   imageDataUrl: string;
+  sourceImageDataUrl?: string;
+  specimenImageDataUrl?: string;
+  thumbnailDataUrl?: string;
+  objectBoundary?: ObjectBoundary;
+  extraction?: Omit<ExtractionResult, "specimenImageDataUrl" | "sourceImageDataUrl" | "objectBoundary">;
   objectName: string;
   whyNow: string;
   futureMemory: string;

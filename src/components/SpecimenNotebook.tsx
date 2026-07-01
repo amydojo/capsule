@@ -20,7 +20,7 @@ export default function SpecimenNotebook({ small = false, refined = false }: Spe
           <div className="absolute left-[30%] right-[22%] top-[29%] h-px bg-[rgba(23,25,28,0.13)]" />
           <div className="absolute left-[30%] top-[38%] h-px w-[44%] bg-[rgba(23,25,28,0.11)]" />
           <div className="absolute left-[30%] top-[47%] h-px w-[35%] bg-[rgba(23,25,28,0.08)]" />
-          <div className="absolute bottom-[24%] left-[30%] h-px w-[34%] bg-[rgba(47,126,247,0.36)]" />
+          <div className="absolute bottom-[24%] left-[30%] h-px w-[34%] bg-[rgba(101,112,255,0.36)]" />
           <div className="absolute right-[9%] top-[12%] h-[19%] w-[12%] rounded border border-[rgba(23,25,28,0.16)] bg-white/42 shadow-[inset_0_1px_0_rgba(255,255,255,0.76),0_3px_8px_rgba(23,25,28,0.045)]" />
           <div className="absolute left-[12%] top-[10%] h-2 w-2 rounded-full bg-[rgba(23,25,28,0.14)]" />
           <div className="absolute left-[12%] top-[19%] h-2 w-2 rounded-full bg-[rgba(23,25,28,0.115)]" />
@@ -30,7 +30,7 @@ export default function SpecimenNotebook({ small = false, refined = false }: Spe
         <div className="absolute bottom-[10%] left-[18%] right-[13%] h-[4%] rounded-full bg-[rgba(23,25,28,0.13)]" />
       </div>
       {refined && (
-        <div className="absolute -inset-5 rounded-2xl border border-[rgba(47,126,247,0.18)] shadow-[0_0_42px_rgba(47,126,247,0.08)]" />
+        <div className="absolute -inset-5 rounded-2xl border border-[rgba(101,112,255,0.18)] shadow-[0_0_42px_rgba(101,112,255,0.08)]" />
       )}
     </div>
   );

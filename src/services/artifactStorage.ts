@@ -29,12 +29,13 @@ const readRawArtifacts = (): Artifact[] => {
 };
 
 const writeArtifacts = (artifacts: Artifact[]) => {
-  if (!canUseStorage()) return;
+  if (!canUseStorage()) return false;
 
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(artifacts));
+    return true;
   } catch {
-    // Local persistence is best-effort. The UI can still continue with in-memory state.
+    return false;
   }
 };
 
@@ -61,7 +62,8 @@ export const saveArtifact = (artifact: Artifact): Artifact[] => {
 
   const existing = getArtifacts().filter((item) => item.id !== artifact.id);
   const artifacts = [result.data, ...existing];
-  writeArtifacts(artifacts);
+  const saved = writeArtifacts(artifacts);
+  if (!saved) throw new Error("Capsule could not save this artifact locally. Try a smaller capture.");
   return artifacts;
 };
 

@@ -1,3 +1,5 @@
+import type { ExtractionMethod, NormalizedBoundary } from "./extraction";
+
 export type PreservationStage = "captured" | "isolated" | "analyzed" | "traced" | "preserved" | "sealed";
 
 export type ArtifactLifecycleStatus = "active" | "sealed" | "rediscovered";
@@ -14,6 +16,15 @@ export type ArtifactObservation = {
   id: string;
   text: string;
   createdAt: string;
+};
+
+export type ObjectBoundary = NormalizedBoundary;
+
+export type ArtifactExtraction = {
+  method: ExtractionMethod;
+  confidence: number;
+  warnings: string[];
+  warning?: string;
 };
 
 export type Artifact = {
@@ -33,7 +44,12 @@ export type Artifact = {
   continuityScore: number;
   currentStage: PreservationStage;
   imageDataUrl: string;
+  isolatedSpecimenDataUrl?: string;
+  sourceImageDataUrl?: string;
+  specimenImageDataUrl?: string;
   thumbnailDataUrl?: string;
+  objectBoundary?: ObjectBoundary;
+  extraction?: ArtifactExtraction;
   createdAt: string;
   updatedAt: string;
   observations: ArtifactObservation[];

@@ -7,6 +7,7 @@ import TopBar from "../components/TopBar";
 import { primaryArtifact } from "../data/artifacts";
 import { addObservation, getArtifacts, markRediscovered } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
+import { getArtifactThumbnailDataUrl, getSpecimenImageDataUrl, hasObjectFieldPending } from "../utils/artifactImage";
 
 const pickRediscoveryArtifact = () => {
   const stored = getArtifacts();
@@ -26,6 +27,8 @@ export default function Rediscover() {
   const navigate = useNavigate();
   const [artifact, setArtifact] = useState<Artifact>(() => pickRediscoveryArtifact());
   const isStored = Boolean(getArtifacts().find((item) => item.id === artifact.id));
+  const specimenImage = getSpecimenImageDataUrl(artifact);
+  const sourceImage = artifact.sourceImageDataUrl || getArtifactThumbnailDataUrl(artifact) || specimenImage;
 
   const handleRediscover = () => {
     if (!isStored) return;
@@ -42,63 +45,64 @@ export default function Rediscover() {
   };
 
   return (
-    <main className="min-h-screen pb-12">
-      <TopBar fossilId={artifact.id} />
+    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-12">
+      <TopBar fossilId={artifact.id} tone="dark" />
       <section className="mx-auto w-full max-w-[72rem] px-5 sm:px-8 lg:px-10">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[var(--capsule-blue)] shadow-[0_0_0_6px_var(--capsule-glow)]" />
-            <span className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">RESURFACED</span>
+            <span className="h-2 w-2 rounded-full bg-[var(--capsule-mineral-olive)] shadow-[0_0_0_6px_var(--capsule-mineral-olive-soft)]" />
+            <span className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">RESURFACED</span>
           </div>
-          <h1 className="mt-5 text-3xl font-semibold tracking-[0.01em] sm:text-5xl">{artifact.title}</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-[var(--capsule-ash)]">{artifact.essence}</p>
+          <h1 className="mt-5 text-3xl font-semibold tracking-[0.01em] text-[var(--capsule-bone)] sm:text-5xl">{artifact.title}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-[var(--capsule-ash-dim)]">{artifact.essence}</p>
         </div>
 
-        <SpecimenStage mode="artifact" imageDataUrl={artifact.imageDataUrl} imageAlt={artifact.title} showIsolationChip={Boolean(artifact.imageDataUrl)} />
+        <SpecimenStage mode="artifact" tone="dark" imageDataUrl={specimenImage} imageAlt={artifact.title} showIsolationChip={Boolean(specimenImage)} isolationLabel={artifact.extraction?.method === "manual-object-field" ? "Isolation: manual" : "Isolation: simulated"} />
+        {hasObjectFieldPending(artifact) && <p className="mt-4 text-center mono-label text-[0.62rem] text-[var(--capsule-ash-dim)]">Object field pending.</p>}
 
         <div className="mx-auto mt-9 flex max-w-4xl flex-col items-center gap-2 text-center">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">FOSSIL ID {artifact.id}</p>
-          <p className="text-2xl font-semibold text-[var(--capsule-graphite)]">Captured {daysSince(artifact.createdAt)} days ago</p>
+          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">FOSSIL ID {artifact.id}</p>
+          <p className="text-2xl font-semibold text-[var(--capsule-bone)]">Captured {daysSince(artifact.createdAt)} days ago</p>
         </div>
 
         <section className="mx-auto mt-10 grid max-w-4xl gap-5 sm:grid-cols-2">
-          <div className="border-t border-[var(--capsule-line)] pt-5">
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">THEN</p>
-            <div className="mt-5 flex min-h-40 items-center justify-center rounded-2xl border border-[rgba(229,226,220,0.7)] bg-white/48">
-              {artifact.thumbnailDataUrl || artifact.imageDataUrl ? (
-                <img src={artifact.thumbnailDataUrl || artifact.imageDataUrl} alt={`${artifact.title} captured`} className="max-h-36 max-w-full rounded-xl object-contain" />
+          <div className="border-t border-[var(--capsule-line-dark)] pt-5">
+            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">THEN</p>
+            <div className="mt-5 flex min-h-40 items-center justify-center rounded-2xl border border-[var(--capsule-line-dark)] bg-white/[0.045]">
+              {sourceImage ? (
+                <img src={sourceImage} alt={`${artifact.title} captured`} className="max-h-36 max-w-full rounded-xl object-contain" />
               ) : (
                 <SpecimenNotebook small />
               )}
             </div>
-            <p className="mt-4 text-sm text-[var(--capsule-ash)]">Captured</p>
-            <p className="font-mono text-sm text-[var(--capsule-graphite)]">{artifact.capturePoint}</p>
+            <p className="mt-4 text-sm text-[var(--capsule-ash-dim)]">Captured</p>
+            <p className="font-mono text-sm text-[var(--capsule-bone)]">{artifact.capturePoint}</p>
           </div>
-          <div className="border-t border-[var(--capsule-line)] pt-5">
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">NOW</p>
-            <div className="mt-5 flex min-h-40 items-center justify-center rounded-2xl border border-[rgba(47,126,247,0.2)] bg-white/54">
-              {artifact.imageDataUrl ? (
-                <img src={artifact.imageDataUrl} alt={`${artifact.title} specimen`} className="max-h-36 max-w-full rounded-xl object-contain" />
+          <div className="border-t border-[var(--capsule-line-dark)] pt-5">
+            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">NOW</p>
+            <div className="mt-5 flex min-h-40 items-center justify-center rounded-2xl border border-[rgba(101,112,255,0.24)] bg-white/[0.055]">
+              {specimenImage ? (
+                <img src={specimenImage} alt={`${artifact.title} specimen`} className="max-h-36 max-w-full rounded-xl object-contain" />
               ) : (
                 <SpecimenNotebook small refined />
               )}
             </div>
-            <p className="mt-4 text-sm text-[var(--capsule-ash)]">Specimen</p>
-            <p className="font-mono text-sm text-[var(--capsule-graphite)]">{new Date().toLocaleDateString()}</p>
+            <p className="mt-4 text-sm text-[var(--capsule-ash-dim)]">Specimen</p>
+            <p className="font-mono text-sm text-[var(--capsule-bone)]">{new Date().toLocaleDateString()}</p>
           </div>
         </section>
 
         <div className="mx-auto mt-7 flex max-w-4xl flex-wrap gap-3">
           <button
             onClick={() => (isStored ? navigate(`/artifact/${artifact.id}`) : navigate("/archive"))}
-            className="primary-button px-5 py-3 text-sm font-medium"
+            className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-5 py-3 text-sm font-medium text-[var(--capsule-graphite-black)]"
           >
             Open Artifact
           </button>
-          <button onClick={handleObservation} disabled={!isStored} className="secondary-button px-5 py-3 text-sm font-medium">Add Observation</button>
-          <button onClick={handleRediscover} disabled={!isStored} className="secondary-button px-5 py-3 text-sm font-medium">Mark Rediscovered</button>
+          <button onClick={handleObservation} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Add Observation</button>
+          <button onClick={handleRediscover} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Mark Rediscovered</button>
         </div>
-        <BottomNav />
+        <BottomNav tone="dark" />
       </section>
     </main>
   );

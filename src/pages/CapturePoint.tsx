@@ -1,5 +1,5 @@
 import type { ChangeEvent, DragEvent, FormEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 import CameraCapture from "../components/CameraCapture";
@@ -7,14 +7,18 @@ import CaptureFrame from "../components/CaptureFrame";
 import CaptureModeToggle from "../components/CaptureModeToggle";
 import CapturePreview from "../components/CapturePreview";
 import MobileCaptureCTA from "../components/MobileCaptureCTA";
+import ObjectSelector from "../components/ObjectSelector";
+import SpecimenPreview from "../components/SpecimenPreview";
 import TopBar from "../components/TopBar";
 import { usePreservationSession } from "../context/PreservationSessionContext";
 import { primaryArtifact } from "../data/artifacts";
 import { useIsMobile } from "../hooks/useIsMobile";
 import type { CaptureInput } from "../types/capture";
-import { fileToDataUrl, makeThumbnail, resizeImageDataUrl, validateImageFile } from "../utils/image";
+import type { ExtractionResult } from "../types/extraction";
+import { fileToDataUrl, resizeImageDataUrl, validateImageFile } from "../utils/image";
+import { makeSpecimenThumbnail } from "../utils/objectExtraction";
 
-type CapturePointStep = "camera" | "camera-error" | "upload" | "confirm-photo" | "meaning" | "ready" | "submitting";
+type CapturePointStep = "camera" | "upload" | "confirm-source" | "select-object" | "specimen-locked" | "meaning" | "submitting" | "error";
 
 const formatCapturePoint = () =>
   new Intl.DateTimeFormat("en-US", {
@@ -31,8 +35,9 @@ export default function CapturePoint() {
   const { startCapture } = usePreservationSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<CapturePointStep>("camera");
-  const [imageDataUrl, setImageDataUrl] = useState("");
-  const [confirmedImageDataUrl, setConfirmedImageDataUrl] = useState("");
+  const [sourceImageDataUrl, setSourceImageDataUrl] = useState("");
+  const [extractionResult, setExtractionResult] = useState<ExtractionResult | undefined>();
+  const [specimenThumbnailDataUrl, setSpecimenThumbnailDataUrl] = useState("");
   const [objectName, setObjectName] = useState("");
   const [whyNow, setWhyNow] = useState("");
   const [futureMemory, setFutureMemory] = useState("");
@@ -40,18 +45,13 @@ export default function CapturePoint() {
   const [error, setError] = useState("");
   const [isProcessingImage, setIsProcessingImage] = useState(false);
 
-  const formReady = Boolean(confirmedImageDataUrl && objectName.trim() && whyNow.trim() && futureMemory.trim());
-  const showMeaning = step === "meaning" || step === "ready" || step === "submitting";
-  const showModeToggle = !isMobile && (step === "camera" || step === "camera-error" || step === "upload");
-
-  useEffect(() => {
-    if (step !== "meaning" && step !== "ready") return;
-    setStep(formReady ? "ready" : "meaning");
-  }, [formReady, step]);
+  const specimenImageDataUrl = extractionResult?.specimenImageDataUrl || "";
+  const formReady = Boolean(extractionResult && objectName.trim() && whyNow.trim() && futureMemory.trim());
+  const showMeaning = step === "meaning" || step === "submitting";
+  const showModeToggle = !isMobile && (step === "camera" || step === "upload");
 
   const prepareImage = async (dataUrl: string) => {
     const resized = await resizeImageDataUrl(dataUrl, { maxWidth: 1600, maxHeight: 1600, quality: 0.88 });
-    await makeThumbnail(resized, { maxWidth: 480, quality: 0.75 });
     return resized;
   };
 
@@ -68,9 +68,10 @@ export default function CapturePoint() {
       setIsProcessingImage(true);
       const dataUrl = await fileToDataUrl(file);
       const resized = await prepareImage(dataUrl);
-      setImageDataUrl(resized);
-      setConfirmedImageDataUrl("");
-      setStep("confirm-photo");
+      setSourceImageDataUrl(resized);
+      setExtractionResult(undefined);
+      setSpecimenThumbnailDataUrl("");
+      setStep("confirm-source");
     } catch {
       setError("Image could not be prepared for preservation.");
     } finally {
@@ -82,9 +83,10 @@ export default function CapturePoint() {
     setError("");
     try {
       const resized = await prepareImage(dataUrl);
-      setImageDataUrl(resized);
-      setConfirmedImageDataUrl("");
-      setStep("confirm-photo");
+      setSourceImageDataUrl(resized);
+      setExtractionResult(undefined);
+      setSpecimenThumbnailDataUrl("");
+      setStep("confirm-source");
     } catch {
       setError("Camera frame could not be prepared for preservation.");
     }
@@ -100,14 +102,27 @@ export default function CapturePoint() {
     void processFile(event.dataTransfer.files?.[0]);
   };
 
-  const usePhoto = () => {
-    setConfirmedImageDataUrl(imageDataUrl);
-    setStep(formReady ? "ready" : "meaning");
+  const selectObject = () => {
+    setError("");
+    setStep("select-object");
+  };
+
+  const lockSpecimen = async (result: ExtractionResult) => {
+    setExtractionResult(result);
+    setError("");
+    try {
+      const thumbnail = await makeSpecimenThumbnail({ specimenImageDataUrl: result.specimenImageDataUrl });
+      setSpecimenThumbnailDataUrl(thumbnail);
+    } catch {
+      setSpecimenThumbnailDataUrl(result.specimenImageDataUrl);
+    }
+    setStep("specimen-locked");
   };
 
   const retakePhoto = () => {
-    setImageDataUrl("");
-    setConfirmedImageDataUrl("");
+    setSourceImageDataUrl("");
+    setExtractionResult(undefined);
+    setSpecimenThumbnailDataUrl("");
     setError("");
     setStep("camera");
   };
@@ -121,8 +136,14 @@ export default function CapturePoint() {
     event.preventDefault();
     setError("");
 
-    if (!confirmedImageDataUrl) {
-      setError("Capture or choose an object image before preservation.");
+    if (!sourceImageDataUrl) {
+      setError("Capture or upload a Source Capture first.");
+      setStep("error");
+      return;
+    }
+    if (!extractionResult) {
+      setError("Lock the Object Field before preserving.");
+      setStep("select-object");
       return;
     }
     if (!formReady) {
@@ -133,7 +154,17 @@ export default function CapturePoint() {
 
     setStep("submitting");
     const input: CaptureInput = {
-      imageDataUrl: confirmedImageDataUrl,
+      imageDataUrl: extractionResult.specimenImageDataUrl,
+      sourceImageDataUrl: extractionResult.sourceImageDataUrl,
+      specimenImageDataUrl: extractionResult.specimenImageDataUrl,
+      thumbnailDataUrl: specimenThumbnailDataUrl || extractionResult.specimenImageDataUrl,
+      objectBoundary: extractionResult.objectBoundary,
+      extraction: {
+        method: extractionResult.method,
+        confidence: extractionResult.confidence,
+        warnings: extractionResult.warnings,
+        createdAt: extractionResult.createdAt,
+      },
       objectName: objectName.trim(),
       whyNow: whyNow.trim(),
       futureMemory: futureMemory.trim(),
@@ -146,13 +177,13 @@ export default function CapturePoint() {
   };
 
   return (
-    <main className="min-h-[100dvh] overflow-x-hidden pb-28 md:pb-12">
-      <TopBar fossilId={primaryArtifact.id} />
+    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-28 md:pb-12">
+      <TopBar fossilId={primaryArtifact.id} tone="dark" />
       <form onSubmit={handleSubmit} className="mx-auto w-full max-w-[78rem] px-5 sm:px-8 lg:px-10">
-        <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div className="mb-6 hidden flex-col justify-between gap-4 md:flex md:flex-row md:items-end">
           <div>
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">CAPTURE POINT</p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-[0.01em] sm:text-5xl">Prepare object for preservation.</h1>
+            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">CAPTURE POINT</p>
+            <h1 className="mt-2 text-4xl font-semibold tracking-[0.01em] text-[var(--capsule-bone)] sm:text-5xl">Prepare object for preservation.</h1>
           </div>
           {showModeToggle && (
             <CaptureModeToggle
@@ -168,11 +199,11 @@ export default function CapturePoint() {
               <CameraCapture onCapture={(dataUrl) => void handleCameraCapture(dataUrl)} onUploadInstead={goToUpload} />
             )}
 
-            {step === "camera-error" && (
-              <CaptureFrame label="CAPTURE POINT" status="CAMERA UNAVAILABLE" mode="empty">
+            {step === "error" && (
+              <CaptureFrame label="CAPTURE POINT" status="INTAKE INTERRUPTED" mode="empty">
                 <div className="mx-auto max-w-sm px-6 text-center text-white">
-                  <p className="text-lg font-semibold">Camera access is unavailable.</p>
-                  <p className="mt-3 text-sm leading-6 text-white/58">You can still upload an image.</p>
+                  <p className="text-lg font-semibold">Source Capture is unavailable.</p>
+                  <p className="mt-3 text-sm leading-6 text-white/58">{error || "Capture or upload a source image first."}</p>
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                     <button type="button" onClick={() => setStep("camera")} className="primary-button px-5 py-3 text-sm font-medium">Try Again</button>
                     <button type="button" onClick={goToUpload} className="secondary-button px-5 py-3 text-sm font-medium">Upload Instead</button>
@@ -199,21 +230,29 @@ export default function CapturePoint() {
               </button>
             )}
 
-            {step === "confirm-photo" && imageDataUrl && (
-              <CapturePreview imageDataUrl={imageDataUrl} onRetake={retakePhoto} onUsePhoto={usePhoto} onUploadInstead={goToUpload} />
+            {step === "confirm-source" && sourceImageDataUrl && (
+              <CapturePreview imageDataUrl={sourceImageDataUrl} onRetake={retakePhoto} onSelectObject={selectObject} onUploadInstead={goToUpload} />
             )}
 
-            {showMeaning && confirmedImageDataUrl && (
+            {step === "select-object" && sourceImageDataUrl && (
+              <ObjectSelector sourceImageDataUrl={sourceImageDataUrl} onConfirm={(result) => void lockSpecimen(result)} onRetake={retakePhoto} onCancel={goToUpload} objectName={objectName} />
+            )}
+
+            {step === "specimen-locked" && extractionResult && (
+              <SpecimenPreview extraction={extractionResult} onContinue={() => setStep("meaning")} onReselect={() => setStep("select-object")} />
+            )}
+
+            {showMeaning && specimenImageDataUrl && (
               <div className="space-y-5">
-                <CaptureFrame label="PHOTO LOCKED" status="MEANING REQUIRED" mode="preview" className="md:hidden">
+                <CaptureFrame label="SPECIMEN LOCKED" status="MEANING REQUIRED" mode="preview" className="md:hidden">
                   <div className="relative flex h-full w-full items-center justify-center p-8">
-                    <img src={confirmedImageDataUrl} alt="Confirmed object" className="relative max-h-[38dvh] max-w-full rounded-xl object-contain shadow-[0_22px_52px_rgba(0,0,0,0.28)]" />
+                    <img src={specimenImageDataUrl} alt="Specimen Image" className="relative max-h-[38dvh] max-w-full rounded-xl object-contain shadow-[0_22px_52px_rgba(0,0,0,0.28)]" />
                   </div>
                 </CaptureFrame>
                 <div className="hidden md:block">
-                  <CaptureFrame label="PHOTO LOCKED" status="MEANING REQUIRED" mode="preview">
+                  <CaptureFrame label="SPECIMEN LOCKED" status="OBJECT FIELD" mode="preview">
                     <div className="relative flex h-full w-full items-center justify-center p-10">
-                      <img src={confirmedImageDataUrl} alt="Confirmed object" className="relative max-h-[44rem] max-w-full rounded-xl object-contain shadow-[0_30px_70px_rgba(0,0,0,0.3)]" />
+                      <img src={specimenImageDataUrl} alt="Specimen Image" className="relative max-h-[44rem] max-w-full rounded-xl object-contain shadow-[0_30px_70px_rgba(0,0,0,0.3)]" />
                     </div>
                   </CaptureFrame>
                 </div>
@@ -225,57 +264,57 @@ export default function CapturePoint() {
           <aside className={`${showMeaning ? "block" : "hidden lg:block"} lg:pt-2`}>
             {showMeaning ? (
               <div className="space-y-3">
-                <label className="instrument-panel block rounded-2xl p-5">
-                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash)]">What is this object?</span>
+                <label className="instrument-card-dark block rounded-2xl p-5">
+                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash-dim)]">What is this object?</span>
                   <input
                     value={objectName}
                     disabled={step === "submitting"}
                     onChange={(event) => setObjectName(event.target.value)}
                     placeholder="field notebook, climbing shoes, first order label..."
-                    className="mt-3 w-full bg-transparent text-base text-[var(--capsule-graphite)] outline-none placeholder:text-[var(--capsule-ash)]"
+                    className="mt-3 w-full bg-transparent text-base text-[var(--capsule-bone)] outline-none placeholder:text-[var(--capsule-ash-dim)]"
                   />
                 </label>
-                <label className="instrument-panel block rounded-2xl p-5">
-                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash)]">Why are you preserving it today?</span>
+                <label className="instrument-card-dark block rounded-2xl p-5">
+                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash-dim)]">Why are you preserving it today?</span>
                   <textarea
                     value={whyNow}
                     disabled={step === "submitting"}
                     onChange={(event) => setWhyNow(event.target.value)}
                     placeholder="what made this object worth preserving now?"
                     rows={3}
-                    className="mt-3 w-full resize-none bg-transparent text-base leading-6 text-[var(--capsule-graphite)] outline-none placeholder:text-[var(--capsule-ash)]"
+                    className="mt-3 w-full resize-none bg-transparent text-base leading-6 text-[var(--capsule-bone)] outline-none placeholder:text-[var(--capsule-ash-dim)]"
                   />
                 </label>
-                <label className="instrument-panel block rounded-2xl p-5">
-                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash)]">What should future-you not forget?</span>
+                <label className="instrument-card-dark block rounded-2xl p-5">
+                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash-dim)]">What should future-you not forget?</span>
                   <textarea
                     value={futureMemory}
                     disabled={step === "submitting"}
                     onChange={(event) => setFutureMemory(event.target.value)}
                     placeholder="the detail time will erase first..."
                     rows={3}
-                    className="mt-3 w-full resize-none bg-transparent text-base leading-6 text-[var(--capsule-graphite)] outline-none placeholder:text-[var(--capsule-ash)]"
+                    className="mt-3 w-full resize-none bg-transparent text-base leading-6 text-[var(--capsule-bone)] outline-none placeholder:text-[var(--capsule-ash-dim)]"
                   />
                 </label>
-                <label className="instrument-panel block rounded-2xl p-5">
-                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash)]">Origin</span>
+                <label className="instrument-card-dark block rounded-2xl p-5">
+                  <span className="mono-label text-[0.65rem] text-[var(--capsule-ash-dim)]">Origin</span>
                   <input
                     value={origin}
                     disabled={step === "submitting"}
                     onChange={(event) => setOrigin(event.target.value)}
                     placeholder="desk / afternoon / glendora, ca"
-                    className="mt-3 w-full bg-transparent text-base text-[var(--capsule-graphite)] outline-none placeholder:text-[var(--capsule-ash)]"
+                    className="mt-3 w-full bg-transparent text-base text-[var(--capsule-bone)] outline-none placeholder:text-[var(--capsule-ash-dim)]"
                   />
                 </label>
-                {error && <p className="rounded-2xl border border-[rgba(229,226,220,0.7)] bg-white/62 p-4 text-sm text-[var(--capsule-graphite)]">{error}</p>}
+                {error && <p className="rounded-2xl border border-[var(--capsule-line-dark)] bg-white/[0.06] p-4 text-sm text-[var(--capsule-bone)]">{error}</p>}
                 <button type="submit" disabled={step === "submitting" || !formReady} className="primary-button hidden min-h-11 px-5 py-3 text-sm font-medium disabled:opacity-45 md:inline-flex">
                   {step === "submitting" ? "Preparing Chamber..." : "Add to Chamber"}
                 </button>
               </div>
             ) : (
-              <div className="instrument-panel rounded-2xl p-5">
-                <p className="mono-label text-[0.65rem] text-[var(--capsule-ash)]">Capture sequence</p>
-                <p className="mt-3 text-sm leading-6 text-[var(--capsule-graphite)]">Capture the object first. Meaning prompts appear after the photo is locked.</p>
+              <div className="instrument-card-dark rounded-2xl p-5">
+                <p className="mono-label text-[0.65rem] text-[var(--capsule-ash-dim)]">Capture sequence</p>
+                <p className="mt-3 text-sm leading-6 text-[var(--capsule-ash-dim)]">Capture the source first. Meaning prompts appear after the object field is locked.</p>
               </div>
             )}
           </aside>
@@ -288,8 +327,8 @@ export default function CapturePoint() {
           />
         )}
       </form>
-      <div className="mx-auto max-w-[78rem] px-5 sm:px-8 lg:px-10">
-        <BottomNav />
+      <div className={`mx-auto max-w-[78rem] px-5 sm:px-8 lg:px-10 ${showMeaning ? "hidden md:block" : ""}`}>
+        <BottomNav tone="dark" />
       </div>
     </main>
   );

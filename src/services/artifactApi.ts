@@ -3,16 +3,21 @@ import type { Artifact } from "../types/artifact";
 import type { CaptureInput } from "../types/capture";
 import { generateClientFallbackArtifact } from "./clientFallbackArtifact";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8787";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
 export const generateArtifact = async (input: CaptureInput): Promise<Artifact> => {
+  const requestInput: CaptureInput = {
+    ...input,
+    imageDataUrl: input.specimenImageDataUrl || input.imageDataUrl,
+  };
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/artifacts/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(input),
+      body: JSON.stringify(requestInput),
     });
 
     if (!response.ok) {
@@ -27,6 +32,6 @@ export const generateArtifact = async (input: CaptureInput): Promise<Artifact> =
 
     return parsed.data.artifact;
   } catch {
-    return generateClientFallbackArtifact(input);
+    return generateClientFallbackArtifact(requestInput);
   }
 };

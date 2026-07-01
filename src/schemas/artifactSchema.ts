@@ -30,6 +30,31 @@ export const ArtifactObservationSchema = z.object({
   createdAt: z.string().min(1),
 });
 
+export const ObjectBoundarySchema = z.object({
+  x: z.coerce.number().min(0).max(1),
+  y: z.coerce.number().min(0).max(1),
+  width: z.coerce.number().min(0).max(1),
+  height: z.coerce.number().min(0).max(1),
+  unit: z.literal("normalized"),
+});
+
+export const ExtractionMethodSchema = z.enum(["manual-object-field", "assisted-object-field", "simulated-isolation", "fallback"]);
+
+export const ArtifactExtractionSchema = z.preprocess((value) => {
+  if (!value || typeof value !== "object") return value;
+  const extraction = value as { method?: string; warning?: string; warnings?: string[] };
+  return {
+    ...extraction,
+    method: extraction.method === "manual-crop" ? "manual-object-field" : extraction.method,
+    warnings: Array.isArray(extraction.warnings) ? extraction.warnings : extraction.warning ? [extraction.warning] : [],
+  };
+}, z.object({
+  method: ExtractionMethodSchema,
+  confidence: z.coerce.number().min(0).max(1),
+  warnings: z.array(z.string()).default([]),
+  warning: z.string().optional(),
+}));
+
 export const ArtifactSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -47,7 +72,12 @@ export const ArtifactSchema = z.object({
   continuityScore: z.coerce.number().min(0).max(100),
   currentStage: PreservationStageSchema,
   imageDataUrl: z.string().min(1),
+  isolatedSpecimenDataUrl: z.string().optional(),
+  sourceImageDataUrl: z.string().optional(),
+  specimenImageDataUrl: z.string().optional(),
   thumbnailDataUrl: z.string().optional(),
+  objectBoundary: ObjectBoundarySchema.optional(),
+  extraction: ArtifactExtractionSchema.optional(),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
   observations: z.array(ArtifactObservationSchema),
