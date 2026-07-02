@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 import ContinuityBar from "../components/ContinuityBar";
@@ -6,7 +6,7 @@ import PreservationField from "../components/PreservationField";
 import TopBar from "../components/TopBar";
 import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { artifacts as sampleArtifacts, primaryArtifact } from "../data/artifacts";
-import { getArtifacts } from "../services/artifactStorage";
+import { loadArtifacts } from "../services/artifactStorage";
 import type { Artifact, ArtifactLifecycleStatus } from "../types/artifact";
 import { getArtifactHeroImage, hasObjectFieldPending } from "../utils/artifactImage";
 
@@ -55,7 +55,18 @@ const ArtifactRow = ({ artifact, linked = true }: { artifact: Artifact; linked?:
 export default function Archive() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ArtifactLifecycleStatus | "all">("all");
-  const generatedArtifacts = getArtifacts();
+  const [generatedArtifacts, setGeneratedArtifacts] = useState<Artifact[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadArtifacts().then((artifacts) => {
+      if (!cancelled) setGeneratedArtifacts(artifacts);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredArtifacts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();

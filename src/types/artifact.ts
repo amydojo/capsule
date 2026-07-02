@@ -45,6 +45,37 @@ export type ArtifactRenderMetadata = {
   provider?: "openai" | "local" | "none";
 };
 
+export type ArtifactImageField =
+  | "sourceImageDataUrl"
+  | "specimenImageDataUrl"
+  | "imageDataUrl"
+  | "artifactRenderDataUrl"
+  | "isolatedSpecimenDataUrl"
+  | "pristineSpecimenDataUrl"
+  | "thumbnailDataUrl";
+
+export type ArtifactImageReference = {
+  storage: "indexeddb-v1";
+  key: string;
+  byteSize: number;
+  createdAt: string;
+};
+
+export type ArtifactStorageDiagnostics = {
+  version: string;
+  method: "indexeddb-v1" | "localstorage-legacy" | "metadata-only-degraded";
+  compressionApplied: boolean;
+  localStorageBytes?: number;
+  indexedDbImageBytes?: number;
+  sourceOriginalBytes?: number;
+  sourceStoredBytes?: number;
+  artifactRenderStoredBytes?: number;
+  droppedImageFields?: string[];
+  lastSaveStatus: "success" | "failed" | "degraded";
+  lastSaveReason?: string;
+  createdAt: string;
+};
+
 export type Artifact = {
   id: string;
   title: string;
@@ -75,6 +106,8 @@ export type Artifact = {
   updatedAt: string;
   observations: ArtifactObservation[];
   timeline: ArtifactTimelineEvent[];
+  imageReferences?: Partial<Record<ArtifactImageField, ArtifactImageReference>>;
+  storage?: ArtifactStorageDiagnostics;
   ai?: {
     provider: string;
     model: string;

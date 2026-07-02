@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 import PreservationField from "../components/PreservationField";
@@ -6,12 +6,11 @@ import SpecimenNotebook from "../components/SpecimenNotebook";
 import TopBar from "../components/TopBar";
 import { getArtifactRoute, ROUTES } from "../constants/navigation";
 import { primaryArtifact } from "../data/artifacts";
-import { addObservation, getArtifacts, markRediscovered } from "../services/artifactStorage";
+import { addObservation, loadArtifacts, markRediscovered } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
 import { getArtifactHeroImage, getArtifactSourceImage, hasObjectFieldPending } from "../utils/artifactImage";
 
-const pickRediscoveryArtifact = () => {
-  const stored = getArtifacts();
+const pickRediscoveryArtifact = (stored: Artifact[]) => {
   const active = stored
     .filter((artifact) => artifact.preservationState === "active")
     .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
@@ -26,23 +25,43 @@ const daysSince = (date: string) => {
 
 export default function Rediscover() {
   const navigate = useNavigate();
-  const [artifact, setArtifact] = useState<Artifact>(() => pickRediscoveryArtifact());
-  const isStored = Boolean(getArtifacts().find((item) => item.id === artifact.id));
+  const [storedArtifacts, setStoredArtifacts] = useState<Artifact[]>([]);
+  const [artifact, setArtifact] = useState<Artifact>(primaryArtifact);
+  const isStored = Boolean(storedArtifacts.find((item) => item.id === artifact.id));
   const heroImage = getArtifactHeroImage(artifact);
   const sourceImage = getArtifactSourceImage(artifact);
 
-  const handleRediscover = () => {
+  useEffect(() => {
+    let cancelled = false;
+    void loadArtifacts().then((artifacts) => {
+      if (cancelled) return;
+      setStoredArtifacts(artifacts);
+      setArtifact(pickRediscoveryArtifact(artifacts));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleRediscover = async () => {
     if (!isStored) return;
-    const updated = markRediscovered(artifact.id);
-    if (updated) setArtifact(updated);
+    const updated = await markRediscovered(artifact.id);
+    if (updated) {
+      setArtifact(updated);
+      setStoredArtifacts((artifacts) => [updated, ...artifacts.filter((item) => item.id !== updated.id)]);
+    }
   };
 
-  const handleObservation = () => {
+  const handleObservation = async () => {
     if (!isStored) return;
     const text = window.prompt("Add a precise observation for this resurfaced artifact:");
     if (!text) return;
-    const updated = addObservation(artifact.id, text);
-    if (updated) setArtifact(updated);
+    const updated = await addObservation(artifact.id, text);
+    if (updated) {
+      setArtifact(updated);
+      setStoredArtifacts((artifacts) => [updated, ...artifacts.filter((item) => item.id !== updated.id)]);
+    }
   };
 
   return (
@@ -102,8 +121,8 @@ export default function Rediscover() {
           >
             Open Artifact
           </button>
-          <button onClick={handleObservation} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Add Observation</button>
-          <button onClick={handleRediscover} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Mark Rediscovered</button>
+          <button onClick={() => void handleObservation()} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Add Observation</button>
+          <button onClick={() => void handleRediscover()} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Mark Rediscovered</button>
         </div>
         <BottomNav tone="dark" />
       </section>

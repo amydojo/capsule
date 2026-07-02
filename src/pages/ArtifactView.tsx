@@ -8,7 +8,7 @@ import PreservationField from "../components/PreservationField";
 import SourceCapturePreview from "../components/SourceCapturePreview";
 import TopBar from "../components/TopBar";
 import { ROUTES } from "../constants/navigation";
-import { addObservation, getArtifactById, sealArtifact } from "../services/artifactStorage";
+import { addObservation, loadArtifact, sealArtifact } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
 import { getArtifactHeroImage, getArtifactSourceImage } from "../utils/artifactImage";
 
@@ -20,16 +20,53 @@ const polishVisibleDetail = (detail: string) => {
   return detail;
 };
 
+const formatBytes = (bytes?: number) => {
+  if (typeof bytes !== "number") return "not recorded";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 102.4) / 10} KB`;
+  return `${Math.round(bytes / 1024 / 102.4) / 10} MB`;
+};
+
 export default function ArtifactView() {
   const { id } = useParams();
   const timelineRef = useRef<HTMLDetailsElement>(null);
-  const [artifact, setArtifact] = useState<Artifact | undefined>(() => (id ? getArtifactById(id) : undefined));
+  const [artifact, setArtifact] = useState<Artifact | undefined>();
+  const [isLoading, setIsLoading] = useState(Boolean(id));
   const [showObservationInput, setShowObservationInput] = useState(false);
   const [observationText, setObservationText] = useState("");
 
   useEffect(() => {
-    setArtifact(id ? getArtifactById(id) : undefined);
+    let cancelled = false;
+    setIsLoading(Boolean(id));
+    if (!id) {
+      setArtifact(undefined);
+      setIsLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    void loadArtifact(id).then((loadedArtifact) => {
+      if (cancelled) return;
+      setArtifact(loadedArtifact);
+      setIsLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
+
+  if (isLoading) {
+    return (
+      <main className="record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+        <TopBar fossilId={id || "CF-00000"} contextLabel="OBJECT RECORD" />
+        <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 text-center">
+          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Loading artifact.</p>
+        </section>
+      </main>
+    );
+  }
 
   if (!artifact) {
     return (
@@ -60,13 +97,13 @@ export default function ArtifactView() {
           ? "Object field render"
           : undefined;
 
-  const handleSeal = () => {
-    const updated = sealArtifact(artifact.id);
+  const handleSeal = async () => {
+    const updated = await sealArtifact(artifact.id);
     if (updated) setArtifact(updated);
   };
 
-  const handleAddObservation = () => {
-    const updated = addObservation(artifact.id, observationText);
+  const handleAddObservation = async () => {
+    const updated = await addObservation(artifact.id, observationText);
     if (updated) {
       setArtifact(updated);
       setObservationText("");
@@ -93,7 +130,7 @@ export default function ArtifactView() {
         <div className="mt-10 sm:mt-14">
           <ArtifactActions
             sealed={sealed}
-            onSeal={handleSeal}
+            onSeal={() => void handleSeal()}
             onAddObservation={() => setShowObservationInput((value) => !value)}
             onViewTimeline={() => timelineRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
           />
@@ -110,7 +147,7 @@ export default function ArtifactView() {
                 placeholder="Add a precise note about this artifact..."
                 className="mt-3 w-full resize-none bg-transparent text-sm leading-6 text-[var(--capsule-graphite)] outline-none placeholder:text-[var(--capsule-ash)]"
               />
-              <button onClick={handleAddObservation} className="primary-button mt-4 min-w-0 px-5 py-3 text-sm font-medium">
+              <button onClick={() => void handleAddObservation()} className="primary-button mt-4 min-w-0 px-5 py-3 text-sm font-medium">
                 Save Observation
               </button>
             </div>
@@ -181,6 +218,23 @@ export default function ArtifactView() {
                 {artifact.ai.provider} / {artifact.ai.model} / {artifact.ai.usedFallback ? "structured generator" : "vision"}
               </p>
             )}
+          </details>
+        )}
+
+        {artifact.storage && (
+          <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
+            <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Storage Diagnostics</summary>
+            <div className="mt-6 grid gap-3 font-mono text-xs leading-6 text-[var(--capsule-ash)] sm:grid-cols-2">
+              <p>Method: {artifact.storage.method}</p>
+              <p>Status: {artifact.storage.lastSaveStatus}</p>
+              <p>Compression: {artifact.storage.compressionApplied ? "applied" : "not applied"}</p>
+              <p>Local metadata: {formatBytes(artifact.storage.localStorageBytes)}</p>
+              <p>IndexedDB images: {formatBytes(artifact.storage.indexedDbImageBytes)}</p>
+              <p>Source: {formatBytes(artifact.storage.sourceStoredBytes)} stored</p>
+              {artifact.storage.artifactRenderStoredBytes !== undefined && <p>Render: {formatBytes(artifact.storage.artifactRenderStoredBytes)}</p>}
+              {artifact.storage.droppedImageFields?.length ? <p>Dropped: {artifact.storage.droppedImageFields.join(", ")}</p> : null}
+              {artifact.storage.lastSaveReason && <p>Reason: {artifact.storage.lastSaveReason}</p>}
+            </div>
           </details>
         )}
 

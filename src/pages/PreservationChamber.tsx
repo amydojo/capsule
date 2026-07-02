@@ -38,6 +38,7 @@ export default function PreservationChamber() {
     resetSession,
   } = usePreservationSession();
   const runRef = useRef<string | null>(null);
+  const retryAttemptRef = useRef(1);
   const autoTimerRef = useRef<number | undefined>(undefined);
   const artifactTimerRef = useRef<number | undefined>(undefined);
   const stageTimersRef = useRef<number[]>([]);
@@ -71,9 +72,10 @@ export default function PreservationChamber() {
   }, [activeInput, isComplete, isPreserving, session.activeStage, session.status]);
 
   const runPreservation = useCallback(
-    async (input: CaptureInput, sessionId: string) => {
-      if (runRef.current === sessionId) return;
-      runRef.current = sessionId;
+    async (input: CaptureInput, sessionId: string, retryAttempt = 1) => {
+      const runKey = `${sessionId}:${retryAttempt}`;
+      if (runRef.current === runKey) return;
+      runRef.current = runKey;
       stageTimersRef.current.forEach((timer) => window.clearTimeout(timer));
       beginPreservation();
 
@@ -93,7 +95,7 @@ export default function PreservationChamber() {
         stageTimers.forEach((timer) => window.clearTimeout(timer));
         stageTimersRef.current = [];
         setStageProgress("preserved", 100);
-        completePreservation(artifact);
+        await completePreservation(artifact, { retryAttempt });
       } catch (error) {
         stageTimers.forEach((timer) => window.clearTimeout(timer));
         stageTimersRef.current = [];
@@ -108,13 +110,20 @@ export default function PreservationChamber() {
     if (!activeInput || session.status !== "intake") return;
     if (autoTimerRef.current) window.clearTimeout(autoTimerRef.current);
     autoTimerRef.current = window.setTimeout(() => {
-      void runPreservation(activeInput, session.id);
+      retryAttemptRef.current = 1;
+      void runPreservation(activeInput, session.id, retryAttemptRef.current);
     }, 600);
 
     return () => {
       if (autoTimerRef.current) window.clearTimeout(autoTimerRef.current);
     };
   }, [activeInput, runPreservation, session.id, session.status]);
+
+  const retryPreservation = () => {
+    if (!activeInput) return;
+    retryAttemptRef.current = Math.min(3, retryAttemptRef.current + 1);
+    void runPreservation(activeInput, session.id, retryAttemptRef.current);
+  };
 
   useEffect(() => {
     return () => {
@@ -231,7 +240,7 @@ export default function PreservationChamber() {
             )}
             {session.status === "error" && activeInput && (
               <>
-                <button onClick={() => void runPreservation(activeInput, session.id)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
+                <button onClick={retryPreservation} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
                   Retry Preservation
                 </button>
                 <button onClick={() => navigate(ROUTES.capture)} className="device-control-button px-7 py-3.5 text-sm font-medium">
