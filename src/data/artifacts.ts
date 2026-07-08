@@ -14,7 +14,7 @@ const timeline = (id: string, title: string): Artifact["timeline"] => [
     id: `${id}-preserved`,
     stage: "preserved",
     label: "Object Preserved",
-    description: "Preservation Chamber completed specimen rendering.",
+    description: "Preservation transition completed specimen rendering.",
     date: now,
   },
 ];

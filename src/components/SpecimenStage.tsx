@@ -4,50 +4,60 @@ import SpecimenNotebook from "./SpecimenNotebook";
 
 type SpecimenStageProps = {
   mode?: "chamber" | "artifact" | "compact";
+  tone?: "light" | "dark";
   showScanLine?: boolean;
   showMarkers?: boolean;
   imageDataUrl?: string;
   imageAlt?: string;
   showIsolationChip?: boolean;
+  isolationLabel?: string;
 };
 
 export default function SpecimenStage({
   mode = "chamber",
+  tone,
   showScanLine = false,
   showMarkers = false,
   imageDataUrl,
   imageAlt = "Captured object specimen",
   showIsolationChip = false,
+  isolationLabel = "Isolation: simulated",
 }: SpecimenStageProps) {
   const compact = mode === "compact";
+  const dark = tone ? tone === "dark" : mode !== "artifact";
   const stageHeight = compact
     ? "min-h-72 rounded-[1.35rem]"
     : mode === "artifact"
-      ? "min-h-[40rem] rounded-[2.35rem] lg:min-h-[46rem]"
-      : "min-h-[42rem] rounded-[2.75rem] lg:min-h-[52rem]";
+      ? "min-h-[28rem] rounded-[2rem] sm:min-h-[40rem] sm:rounded-[2.35rem] lg:min-h-[46rem]"
+      : "min-h-[32rem] rounded-[2rem] sm:min-h-[42rem] sm:rounded-[2.75rem] lg:min-h-[52rem]";
+  const shellTone = dark
+    ? "border-[var(--capsule-line-dark)] bg-[var(--capsule-abyss-black)] chamber-shadow-dark"
+    : "border-[rgba(221,216,206,0.74)] bg-[rgba(250,248,242,0.76)] chamber-shadow";
+  const markerTone = dark ? "text-[var(--capsule-ash-dim)]" : "text-[var(--capsule-ash)]";
 
   return (
     <div
-      className={`relative isolate flex items-center justify-center overflow-hidden border border-[rgba(229,226,220,0.72)] bg-[rgba(255,255,255,0.72)] chamber-shadow ${stageHeight}`}
+      className={`relative isolate flex items-center justify-center overflow-hidden border ${shellTone} ${stageHeight}`}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,1),transparent_24rem),radial-gradient(ellipse_at_50%_57%,rgba(47,126,247,0.07),transparent_20rem),radial-gradient(ellipse_at_50%_73%,rgba(23,25,28,0.065),transparent_34rem)]" aria-hidden="true" />
-      <div className="quiet-grid absolute inset-0 opacity-[0.06]" aria-hidden="true" />
-      <div className="absolute inset-3 rounded-[2.35rem] border border-white/85 bg-white/[0.07] shadow-[inset_0_0_70px_rgba(255,255,255,0.92),inset_0_-26px_54px_rgba(23,25,28,0.035)] sm:inset-6" aria-hidden="true" />
-      <div className="absolute inset-8 rounded-[2rem] border border-[rgba(255,255,255,0.72)] shadow-[inset_0_0_0_1px_rgba(229,226,220,0.42),inset_0_18px_40px_rgba(255,255,255,0.58),inset_0_-30px_70px_rgba(23,25,28,0.045)]" aria-hidden="true" />
-      <div className="absolute inset-x-[8%] top-[11%] h-[70%] rounded-[48%] border border-[rgba(229,226,220,0.56)] bg-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),inset_0_-30px_70px_rgba(23,25,28,0.04)]" aria-hidden="true" />
-      <div className="absolute left-1/2 top-1/2 h-72 w-[36rem] max-w-[78%] -translate-x-1/2 -translate-y-[38%] rounded-[50%] bg-[var(--capsule-glow)] blur-3xl" aria-hidden="true" />
-      <div className="absolute bottom-[15%] h-px w-[78%] bg-[linear-gradient(90deg,transparent,rgba(23,25,28,0.2),transparent)]" />
-      <PressureTrace compact={compact} strong={mode === "chamber"} />
+      <div className={dark ? "absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(242,239,234,0.09),transparent_18rem),radial-gradient(ellipse_at_50%_56%,rgba(101,112,255,0.14),transparent_22rem),radial-gradient(ellipse_at_50%_78%,rgba(0,0,0,0.82),transparent_32rem)]" : "absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,1),transparent_24rem),radial-gradient(ellipse_at_50%_57%,rgba(101,112,255,0.07),transparent_20rem),radial-gradient(ellipse_at_50%_73%,rgba(23,25,28,0.065),transparent_34rem)]"} aria-hidden="true" />
+      <div className={`quiet-grid absolute inset-0 ${dark ? "opacity-[0.035]" : "opacity-[0.06]"}`} aria-hidden="true" />
+      <div className={dark ? "absolute inset-3 rounded-[2rem] border border-white/[0.09] bg-white/[0.018] shadow-[inset_0_0_70px_rgba(242,239,234,0.07),inset_0_-36px_66px_rgba(0,0,0,0.62)] sm:inset-6" : "absolute inset-3 rounded-[2.35rem] border border-white/85 bg-white/[0.07] shadow-[inset_0_0_70px_rgba(255,255,255,0.92),inset_0_-26px_54px_rgba(23,25,28,0.035)] sm:inset-6"} aria-hidden="true" />
+      <div className={dark ? "absolute left-1/2 top-[17%] h-10 w-[72%] -translate-x-1/2 rounded-[50%] border border-[rgba(242,239,234,0.2)] bg-[rgba(242,239,234,0.035)] shadow-[0_0_34px_rgba(242,239,234,0.16),0_0_70px_rgba(101,112,255,0.16)]" : "absolute inset-8 rounded-[2rem] border border-[rgba(255,255,255,0.72)] shadow-[inset_0_0_0_1px_rgba(229,226,220,0.42),inset_0_18px_40px_rgba(255,255,255,0.58),inset_0_-30px_70px_rgba(23,25,28,0.045)]"} aria-hidden="true" />
+      {dark && <div className="absolute left-1/2 bottom-[17%] h-12 w-[76%] -translate-x-1/2 rounded-[50%] border border-[rgba(242,239,234,0.18)] bg-[rgba(242,239,234,0.028)] shadow-[0_0_44px_rgba(242,239,234,0.12),0_0_82px_rgba(101,112,255,0.16)]" aria-hidden="true" />}
+      {!dark && <div className="absolute inset-x-[8%] top-[11%] h-[70%] rounded-[48%] border border-[rgba(221,216,206,0.56)] bg-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),inset_0_-30px_70px_rgba(23,25,28,0.04)]" aria-hidden="true" />}
+      <div className={`${dark ? "bg-[var(--capsule-spectrum-indigo-soft)]" : "bg-[var(--capsule-glow)]"} absolute left-1/2 top-1/2 h-72 w-[36rem] max-w-[78%] -translate-x-1/2 -translate-y-[38%] rounded-[50%] blur-3xl`} aria-hidden="true" />
+      <div className={dark ? "absolute bottom-[15%] h-px w-[78%] bg-[linear-gradient(90deg,transparent,rgba(242,239,234,0.24),transparent)]" : "absolute bottom-[15%] h-px w-[78%] bg-[linear-gradient(90deg,transparent,rgba(23,25,28,0.2),transparent)]"} />
+      <PressureTrace compact={compact} strong={mode === "chamber"} tone={dark ? "dark" : "light"} />
       {showMarkers && (
         <>
-          <div className="mono-label absolute left-7 top-7 text-[0.58rem] text-[var(--capsule-ash)] sm:left-10 sm:top-10">Pressure Trace</div>
-          <div className="absolute right-7 top-8 h-2 w-2 rounded-full bg-[var(--capsule-blue)] shadow-[0_0_0_7px_var(--capsule-glow)] sm:right-10 sm:top-11" />
-          <div className="mono-label absolute bottom-7 right-7 text-[0.58rem] text-[var(--capsule-ash)] sm:bottom-10 sm:right-10">Specimen Render</div>
+          <div className={`mono-label absolute left-7 top-7 text-[0.58rem] ${markerTone} sm:left-10 sm:top-10`}>Pressure Trace</div>
+          <div className="absolute right-7 top-8 h-2 w-2 rounded-full bg-[var(--capsule-spectrum-indigo-bright)] shadow-[0_0_0_7px_var(--capsule-glow)] sm:right-10 sm:top-11" />
+          <div className={`mono-label absolute bottom-7 right-7 text-[0.58rem] ${markerTone} sm:bottom-10 sm:right-10`}>Specimen Render</div>
         </>
       )}
       {showIsolationChip && imageDataUrl && (
-        <div className="mono-label absolute bottom-7 left-7 z-30 rounded-full border border-[rgba(229,226,220,0.72)] bg-white/62 px-3 py-1.5 text-[0.55rem] text-[var(--capsule-ash)] sm:bottom-10 sm:left-10">
-          Isolation: simulated
+        <div className={`mono-label absolute bottom-7 left-7 z-30 rounded-full border px-3 py-1.5 text-[0.55rem] sm:bottom-10 sm:left-10 ${dark ? "border-[var(--capsule-line-dark)] bg-black/34 text-[var(--capsule-ash-dim)]" : "border-[rgba(221,216,206,0.72)] bg-white/62 text-[var(--capsule-ash)]"}`}>
+          {isolationLabel}
         </div>
       )}
       <motion.div
@@ -62,7 +72,7 @@ export default function SpecimenStage({
             <img
               src={imageDataUrl}
               alt={imageAlt}
-              className="relative max-h-full max-w-full rounded-xl object-contain shadow-[0_34px_70px_rgba(23,25,28,0.2)]"
+            className={`relative max-h-full max-w-full rounded-xl object-contain ${dark ? "shadow-[0_36px_82px_rgba(0,0,0,0.62)]" : "shadow-[0_34px_70px_rgba(23,25,28,0.2)]"}`}
             />
           </div>
         ) : (

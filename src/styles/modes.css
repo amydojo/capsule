@@ -1,0 +1,59 @@
+.capsule-mode-archive {
+  --capsule-mode-bg: var(--capsule-cream);
+  --capsule-mode-panel: var(--capsule-paper);
+  --capsule-mode-ink: var(--capsule-black);
+  --capsule-mode-meta: var(--capsule-muted);
+  --capsule-mode-rule: rgba(17, 16, 17, var(--capsule-hairline-opacity));
+
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 18rem),
+    var(--capsule-mode-bg);
+  color: var(--capsule-mode-ink);
+}
+
+.capsule-mode-preservation {
+  --capsule-mode-bg: var(--capsule-black);
+  --capsule-mode-panel: var(--capsule-chapel);
+  --capsule-mode-ink: #ffffff;
+  --capsule-mode-meta: var(--capsule-linen-ash);
+  --capsule-mode-rule: rgba(244, 240, 231, var(--capsule-hairline-opacity));
+
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(67, 81, 90, 0.16), transparent 32rem),
+    linear-gradient(180deg, var(--capsule-chapel), var(--capsule-black) 54%);
+  color: var(--capsule-mode-ink);
+}
+
+.capsule-surface-paper {
+  border: 1px solid rgba(17, 16, 17, var(--capsule-hairline-opacity));
+  border-radius: var(--capsule-radius-panel);
+  background: var(--capsule-paper);
+  color: var(--capsule-black);
+}
+
+.capsule-surface-black {
+  border: 1px solid rgba(244, 240, 231, var(--capsule-hairline-opacity));
+  border-radius: var(--capsule-radius-panel);
+  background: var(--capsule-chapel);
+  color: white;
+}
+
+.capsule-hairline {
+  border-color: var(--capsule-mode-rule, rgba(17, 16, 17, var(--capsule-hairline-opacity)));
+}
+
+.capsule-red-index {
+  color: var(--capsule-red);
+}
+
+.capsule-red-index-fill {
+  background: var(--capsule-red);
+}
+
+.capsule-gold-reveal {
+  color: var(--capsule-gold);
+}
+
+.capsule-gold-reveal-fill {
+  background: var(--capsule-gold);
+}

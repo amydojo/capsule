@@ -1,12 +1,55 @@
 :root {
-  --capsule-stone: #f7f6f2;
-  --capsule-stone-deep: #efede8;
+  --capsule-black: #111011;
+  --capsule-chapel: #1E1A18;
+  --capsule-grave-umber: #372419;
+  --capsule-red: #983931;
+  --capsule-coral: #AF583C;
+  --capsule-gold: #DCBC91;
+  --capsule-blue-gray: #43515A;
+  --capsule-aura-slate: #60707B;
+  --capsule-linen-ash: #ABAAA6;
+  --capsule-printed-bone: #DBD4C8;
+  --capsule-cream: #F4F0E7;
+  --capsule-paper: #EEE8DD;
+  --capsule-hairline: #D8CFC0;
+  --capsule-muted: #7D766C;
+  --capsule-green: #7F8B63;
+
+  --capsule-phone-width: 300px;
+  --capsule-phone-height: 650px;
+  --capsule-inset: 24px;
+  --capsule-inset-wide: 32px;
+  --capsule-radius-phone: 32px;
+  --capsule-radius-panel: 18px;
+  --capsule-hairline-opacity: 0.1;
+
+  --capsule-abyss-black: var(--capsule-black);
+  --capsule-graphite-black: var(--capsule-chapel);
+  --capsule-panel-black: var(--capsule-chapel);
+  --capsule-panel-soft: #18191d;
+
+  --capsule-bone: var(--capsule-cream);
+  --capsule-bone-soft: var(--capsule-cream);
+  --capsule-paper-line: var(--capsule-hairline);
+
+  --capsule-mineral-olive: var(--capsule-green);
+  --capsule-mineral-olive-bright: #9ca977;
+  --capsule-mineral-olive-soft: rgba(127, 139, 99, 0.22);
+
+  --capsule-spectrum-indigo: var(--capsule-blue-gray);
+  --capsule-spectrum-indigo-bright: var(--capsule-aura-slate);
+  --capsule-spectrum-indigo-soft: rgba(67, 81, 90, 0.2);
+  --capsule-spectrum-indigo-glow: rgba(96, 112, 123, 0.28);
+
+  --capsule-ash: var(--capsule-muted);
+  --capsule-ash-dim: rgba(171, 170, 166, 0.68);
+  --capsule-line-dark: rgba(244, 240, 231, 0.1);
+  --capsule-line-light: rgba(17, 16, 17, 0.1);
+
+  --capsule-stone: var(--capsule-bone);
+  --capsule-stone-deep: var(--capsule-paper);
   --capsule-surface: #ffffff;
-  --capsule-ash: #a8aaa7;
-  --capsule-graphite: #17191c;
-  --capsule-blue: #2f7ef7;
-  --capsule-glow: rgba(47, 126, 247, 0.16);
-  --capsule-blue-soft: #e2ecff;
-  --capsule-line: #e5e2dc;
-  --capsule-paper: #fffdfa;
+  --capsule-graphite: var(--capsule-black);
+  --capsule-glow: var(--capsule-spectrum-indigo-soft);
+  --capsule-line: var(--capsule-paper-line);
 }

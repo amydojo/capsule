@@ -1,10 +1,19 @@
-import type { Artifact, PreservationStage } from "./artifact";
+import type { Artifact, ObjectBoundary, PreservationStage } from "./artifact";
+import type { ExtractionResult } from "./extraction";
 
 export type CaptureInput = {
   imageDataUrl: string;
-  objectName: string;
-  whyNow: string;
-  futureMemory: string;
+  sourceImageDataUrl?: string;
+  specimenImageDataUrl?: string;
+  isolatedSpecimenDataUrl?: string;
+  pristineSpecimenDataUrl?: string;
+  artifactRenderDataUrl?: string;
+  thumbnailDataUrl?: string;
+  objectBoundary?: ObjectBoundary;
+  extraction?: Omit<ExtractionResult, "specimenImageDataUrl" | "sourceImageDataUrl" | "objectBoundary">;
+  objectName?: string;
+  whyNow?: string;
+  futureMemory?: string;
   origin?: string;
   capturePoint: string;
 };

@@ -30,6 +30,64 @@ export const ArtifactObservationSchema = z.object({
   createdAt: z.string().min(1),
 });
 
+export const ObjectBoundarySchema = z.object({
+  x: z.coerce.number().min(0).max(1),
+  y: z.coerce.number().min(0).max(1),
+  width: z.coerce.number().min(0).max(1),
+  height: z.coerce.number().min(0).max(1),
+  unit: z.literal("normalized"),
+});
+
+export const ExtractionMethodSchema = z.enum(["manual-object-field", "assisted-object-field", "simulated-isolation", "fallback"]);
+
+export const ArtifactExtractionSchema = z.preprocess((value) => {
+  if (!value || typeof value !== "object") return value;
+  const extraction = value as { method?: string; warning?: string; warnings?: string[] };
+  return {
+    ...extraction,
+    method: extraction.method === "manual-crop" ? "manual-object-field" : extraction.method,
+    warnings: Array.isArray(extraction.warnings) ? extraction.warnings : extraction.warning ? [extraction.warning] : [],
+  };
+}, z.object({
+  method: ExtractionMethodSchema,
+  confidence: z.coerce.number().min(0).max(1),
+  warnings: z.array(z.string()).default([]),
+  warning: z.string().optional(),
+}));
+
+export const ArtifactRenderMetadataSchema = z.object({
+  version: z.string().min(1),
+  method: z.enum(["openai-pristine-render", "background-removed", "specimen-crop", "local-preserved-render", "fallback-render"]),
+  isolationStatus: z.enum(["not_attempted", "success", "failed", "unavailable"]),
+  pristineStatus: z.enum(["not_attempted", "success", "failed", "unavailable"]),
+  localRenderStatus: z.enum(["not_attempted", "success", "failed"]),
+  motionSeed: z.string().min(1),
+  createdAt: z.string().min(1),
+  provider: z.enum(["openai", "local", "none"]).optional(),
+});
+
+export const ArtifactImageReferenceSchema = z.object({
+  storage: z.literal("indexeddb-v1"),
+  key: z.string().min(1),
+  byteSize: z.coerce.number().min(0),
+  createdAt: z.string().min(1),
+});
+
+export const ArtifactStorageDiagnosticsSchema = z.object({
+  version: z.string().min(1),
+  method: z.enum(["indexeddb-v1", "localstorage-legacy", "metadata-only-degraded"]),
+  compressionApplied: z.boolean(),
+  localStorageBytes: z.coerce.number().min(0).optional(),
+  indexedDbImageBytes: z.coerce.number().min(0).optional(),
+  sourceOriginalBytes: z.coerce.number().min(0).optional(),
+  sourceStoredBytes: z.coerce.number().min(0).optional(),
+  artifactRenderStoredBytes: z.coerce.number().min(0).optional(),
+  droppedImageFields: z.array(z.string()).optional(),
+  lastSaveStatus: z.enum(["success", "failed", "degraded"]),
+  lastSaveReason: z.string().optional(),
+  createdAt: z.string().min(1),
+});
+
 export const ArtifactSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -46,12 +104,22 @@ export const ArtifactSchema = z.object({
   preservationState: ArtifactLifecycleStatusSchema,
   continuityScore: z.coerce.number().min(0).max(100),
   currentStage: PreservationStageSchema,
-  imageDataUrl: z.string().min(1),
+  imageDataUrl: z.string().default(""),
+  sourceImageDataUrl: z.string().optional(),
+  specimenImageDataUrl: z.string().optional(),
+  isolatedSpecimenDataUrl: z.string().optional(),
+  pristineSpecimenDataUrl: z.string().optional(),
+  artifactRenderDataUrl: z.string().optional(),
   thumbnailDataUrl: z.string().optional(),
+  objectBoundary: ObjectBoundarySchema.optional(),
+  extraction: ArtifactExtractionSchema.optional(),
+  render: ArtifactRenderMetadataSchema.optional(),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
   observations: z.array(ArtifactObservationSchema),
   timeline: z.array(ArtifactTimelineEventSchema),
+  imageReferences: z.record(z.string(), ArtifactImageReferenceSchema).optional(),
+  storage: ArtifactStorageDiagnosticsSchema.optional(),
   ai: z
     .object({
       provider: z.string().min(1),

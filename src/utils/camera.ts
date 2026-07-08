@@ -1,6 +1,7 @@
 export type CameraErrorKind = "permission" | "insecure" | "not-found" | "unsupported" | "unavailable";
+type CameraErrorInput = DOMException | Error | string | null | undefined;
 
-export const getCameraErrorMessage = (error: unknown): { kind: CameraErrorKind; message: string } => {
+export const getCameraErrorMessage = (error: CameraErrorInput): { kind: CameraErrorKind; message: string } => {
   if (typeof window !== "undefined" && !window.isSecureContext) {
     return {
       kind: "insecure",

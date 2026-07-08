@@ -2,10 +2,33 @@ import { z } from "zod";
 
 export const CaptureInputSchema = z.object({
   imageDataUrl: z.string().startsWith("data:image/"),
-  objectName: z.string().min(1),
-  whyNow: z.string().min(1),
-  futureMemory: z.string().min(1),
-  origin: z.string().optional().default(""),
+  sourceImageDataUrl: z.string().startsWith("data:image/").optional(),
+  specimenImageDataUrl: z.string().startsWith("data:image/").optional(),
+  isolatedSpecimenDataUrl: z.string().startsWith("data:image/").optional(),
+  pristineSpecimenDataUrl: z.string().startsWith("data:image/").optional(),
+  artifactRenderDataUrl: z.string().startsWith("data:image/").optional(),
+  thumbnailDataUrl: z.string().startsWith("data:image/").optional(),
+  objectBoundary: z
+    .object({
+      x: z.coerce.number().min(0).max(1),
+      y: z.coerce.number().min(0).max(1),
+      width: z.coerce.number().min(0).max(1),
+      height: z.coerce.number().min(0).max(1),
+      unit: z.literal("normalized"),
+    })
+    .optional(),
+  extraction: z
+    .object({
+      method: z.enum(["manual-object-field", "assisted-object-field", "simulated-isolation", "fallback"]),
+      confidence: z.coerce.number().min(0).max(1),
+      warnings: z.array(z.string()).optional().default([]),
+      createdAt: z.string().optional(),
+    })
+    .optional(),
+  objectName: z.string().trim().min(1).optional().default("Object"),
+  whyNow: z.string().trim().min(1).optional().default("Preserved from a Capsule capture."),
+  futureMemory: z.string().trim().min(1).optional().default("This object existed here and was worth preserving."),
+  origin: z.string().optional().default("field capture"),
   capturePoint: z.string().min(1),
 });
 
@@ -20,6 +43,33 @@ export const GeneratedArtifactSchema = z.object({
   emotionalHypothesis: z.string().min(1),
   essence: z.string().min(1),
   continuityScore: z.coerce.number().min(70).max(98),
+});
+
+const ExtractionMethodSchema = z.enum(["manual-object-field", "assisted-object-field", "simulated-isolation", "fallback"]);
+const ArtifactExtractionSchema = z.preprocess((value) => {
+  if (!value || typeof value !== "object") return value;
+  const extraction = value;
+  return {
+    ...extraction,
+    method: extraction.method === "manual-crop" ? "manual-object-field" : extraction.method,
+    warnings: Array.isArray(extraction.warnings) ? extraction.warnings : extraction.warning ? [extraction.warning] : [],
+  };
+}, z.object({
+  method: ExtractionMethodSchema,
+  confidence: z.coerce.number().min(0).max(1),
+  warnings: z.array(z.string()).default([]),
+  warning: z.string().optional(),
+}));
+
+export const ArtifactRenderMetadataSchema = z.object({
+  version: z.string().min(1),
+  method: z.enum(["openai-pristine-render", "background-removed", "specimen-crop", "local-preserved-render", "fallback-render"]),
+  isolationStatus: z.enum(["not_attempted", "success", "failed", "unavailable"]),
+  pristineStatus: z.enum(["not_attempted", "success", "failed", "unavailable"]),
+  localRenderStatus: z.enum(["not_attempted", "success", "failed"]),
+  motionSeed: z.string().min(1),
+  createdAt: z.string().min(1),
+  provider: z.enum(["openai", "local", "none"]).optional(),
 });
 
 export const ArtifactSchema = z.object({
@@ -39,7 +89,17 @@ export const ArtifactSchema = z.object({
   continuityScore: z.coerce.number().min(0).max(100),
   currentStage: z.enum(["captured", "isolated", "analyzed", "traced", "preserved", "sealed"]),
   imageDataUrl: z.string().min(1),
+  sourceImageDataUrl: z.string().optional(),
+  specimenImageDataUrl: z.string().optional(),
+  isolatedSpecimenDataUrl: z.string().optional(),
+  pristineSpecimenDataUrl: z.string().optional(),
+  artifactRenderDataUrl: z.string().optional(),
   thumbnailDataUrl: z.string().optional(),
+  objectBoundary: z
+    .object({ x: z.number(), y: z.number(), width: z.number(), height: z.number(), unit: z.literal("normalized") })
+    .optional(),
+  extraction: ArtifactExtractionSchema.optional(),
+  render: ArtifactRenderMetadataSchema.optional(),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
   observations: z.array(z.object({ id: z.string(), text: z.string(), createdAt: z.string() })),

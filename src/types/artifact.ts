@@ -1,3 +1,5 @@
+import type { ExtractionMethod, NormalizedBoundary } from "./extraction";
+
 export type PreservationStage = "captured" | "isolated" | "analyzed" | "traced" | "preserved" | "sealed";
 
 export type ArtifactLifecycleStatus = "active" | "sealed" | "rediscovered";
@@ -13,6 +15,64 @@ export type ArtifactTimelineEvent = {
 export type ArtifactObservation = {
   id: string;
   text: string;
+  createdAt: string;
+};
+
+export type ObjectBoundary = NormalizedBoundary;
+
+export type ArtifactExtraction = {
+  method: ExtractionMethod;
+  confidence: number;
+  warnings: string[];
+  warning?: string;
+};
+
+export type ArtifactRenderMethod =
+  | "openai-pristine-render"
+  | "background-removed"
+  | "specimen-crop"
+  | "local-preserved-render"
+  | "fallback-render";
+
+export type ArtifactRenderMetadata = {
+  version: string;
+  method: ArtifactRenderMethod;
+  isolationStatus: "not_attempted" | "success" | "failed" | "unavailable";
+  pristineStatus: "not_attempted" | "success" | "failed" | "unavailable";
+  localRenderStatus: "not_attempted" | "success" | "failed";
+  motionSeed: string;
+  createdAt: string;
+  provider?: "openai" | "local" | "none";
+};
+
+export type ArtifactImageField =
+  | "sourceImageDataUrl"
+  | "specimenImageDataUrl"
+  | "imageDataUrl"
+  | "artifactRenderDataUrl"
+  | "isolatedSpecimenDataUrl"
+  | "pristineSpecimenDataUrl"
+  | "thumbnailDataUrl";
+
+export type ArtifactImageReference = {
+  storage: "indexeddb-v1";
+  key: string;
+  byteSize: number;
+  createdAt: string;
+};
+
+export type ArtifactStorageDiagnostics = {
+  version: string;
+  method: "indexeddb-v1" | "localstorage-legacy" | "metadata-only-degraded";
+  compressionApplied: boolean;
+  localStorageBytes?: number;
+  indexedDbImageBytes?: number;
+  sourceOriginalBytes?: number;
+  sourceStoredBytes?: number;
+  artifactRenderStoredBytes?: number;
+  droppedImageFields?: string[];
+  lastSaveStatus: "success" | "failed" | "degraded";
+  lastSaveReason?: string;
   createdAt: string;
 };
 
@@ -33,11 +93,21 @@ export type Artifact = {
   continuityScore: number;
   currentStage: PreservationStage;
   imageDataUrl: string;
+  sourceImageDataUrl?: string;
+  specimenImageDataUrl?: string;
+  isolatedSpecimenDataUrl?: string;
+  pristineSpecimenDataUrl?: string;
+  artifactRenderDataUrl?: string;
   thumbnailDataUrl?: string;
+  objectBoundary?: ObjectBoundary;
+  extraction?: ArtifactExtraction;
+  render?: ArtifactRenderMetadata;
   createdAt: string;
   updatedAt: string;
   observations: ArtifactObservation[];
   timeline: ArtifactTimelineEvent[];
+  imageReferences?: Partial<Record<ArtifactImageField, ArtifactImageReference>>;
+  storage?: ArtifactStorageDiagnostics;
   ai?: {
     provider: string;
     model: string;
