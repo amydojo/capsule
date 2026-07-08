@@ -10,6 +10,7 @@ import CapturePoint from "./pages/CapturePoint";
 import PreservationChamber from "./pages/PreservationChamber";
 import Rediscover from "./pages/Rediscover";
 import "./styles/tokens.css";
+import "./styles/modes.css";
 import "./styles/index.css";
 
 createRoot(document.getElementById("root")!).render(

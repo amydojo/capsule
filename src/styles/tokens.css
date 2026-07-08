@@ -1,32 +1,55 @@
 :root {
-  --capsule-abyss-black: #0d0e10;
-  --capsule-graphite-black: #1a1b1e;
-  --capsule-panel-black: #111216;
+  --capsule-black: #111011;
+  --capsule-chapel: #1E1A18;
+  --capsule-grave-umber: #372419;
+  --capsule-red: #983931;
+  --capsule-coral: #AF583C;
+  --capsule-gold: #DCBC91;
+  --capsule-blue-gray: #43515A;
+  --capsule-aura-slate: #60707B;
+  --capsule-linen-ash: #ABAAA6;
+  --capsule-printed-bone: #DBD4C8;
+  --capsule-cream: #F4F0E7;
+  --capsule-paper: #EEE8DD;
+  --capsule-hairline: #D8CFC0;
+  --capsule-muted: #7D766C;
+  --capsule-green: #7F8B63;
+
+  --capsule-phone-width: 300px;
+  --capsule-phone-height: 650px;
+  --capsule-inset: 24px;
+  --capsule-inset-wide: 32px;
+  --capsule-radius-phone: 32px;
+  --capsule-radius-panel: 18px;
+  --capsule-hairline-opacity: 0.1;
+
+  --capsule-abyss-black: var(--capsule-black);
+  --capsule-graphite-black: var(--capsule-chapel);
+  --capsule-panel-black: var(--capsule-chapel);
   --capsule-panel-soft: #18191d;
 
-  --capsule-bone: #f2efea;
-  --capsule-bone-soft: #faf8f2;
-  --capsule-paper-line: #ddd8ce;
+  --capsule-bone: var(--capsule-cream);
+  --capsule-bone-soft: var(--capsule-cream);
+  --capsule-paper-line: var(--capsule-hairline);
 
-  --capsule-mineral-olive: #9a9556;
-  --capsule-mineral-olive-bright: #b8b06a;
-  --capsule-mineral-olive-soft: rgba(154, 149, 86, 0.22);
+  --capsule-mineral-olive: var(--capsule-green);
+  --capsule-mineral-olive-bright: #9ca977;
+  --capsule-mineral-olive-soft: rgba(127, 139, 99, 0.22);
 
-  --capsule-spectrum-indigo: #2f3492;
-  --capsule-spectrum-indigo-bright: #6570ff;
-  --capsule-spectrum-indigo-soft: rgba(101, 112, 255, 0.22);
-  --capsule-spectrum-indigo-glow: rgba(101, 112, 255, 0.38);
+  --capsule-spectrum-indigo: var(--capsule-blue-gray);
+  --capsule-spectrum-indigo-bright: var(--capsule-aura-slate);
+  --capsule-spectrum-indigo-soft: rgba(67, 81, 90, 0.2);
+  --capsule-spectrum-indigo-glow: rgba(96, 112, 123, 0.28);
 
-  --capsule-ash: #a7a39a;
-  --capsule-ash-dim: rgba(242, 239, 234, 0.48);
-  --capsule-line-dark: rgba(242, 239, 234, 0.11);
-  --capsule-line-light: rgba(26, 27, 30, 0.12);
+  --capsule-ash: var(--capsule-muted);
+  --capsule-ash-dim: rgba(171, 170, 166, 0.68);
+  --capsule-line-dark: rgba(244, 240, 231, 0.1);
+  --capsule-line-light: rgba(17, 16, 17, 0.1);
 
   --capsule-stone: var(--capsule-bone);
-  --capsule-stone-deep: #e8e4da;
+  --capsule-stone-deep: var(--capsule-paper);
   --capsule-surface: #ffffff;
-  --capsule-graphite: var(--capsule-graphite-black);
+  --capsule-graphite: var(--capsule-black);
   --capsule-glow: var(--capsule-spectrum-indigo-soft);
   --capsule-line: var(--capsule-paper-line);
-  --capsule-paper: var(--capsule-bone-soft);
 }
