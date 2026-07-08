@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { generateFallbackArtifactPayload } from "../fallback/generateFallbackArtifact.js";
 import { artifactSystemPrompt, buildArtifactUserPrompt } from "../prompts/artifactPrompt.js";
 import { ArtifactSchema, CaptureInputSchema, GeneratedArtifactSchema } from "../schemas/artifactSchema.js";
+import { normalizeArtifactRecord } from "./artifactRecord.js";
 
 const createEventId = () => `evt-${crypto.randomUUID()}`;
 const createFossilId = () => `CF-${Math.floor(10000 + Math.random() * 89999)}`;
@@ -53,6 +54,8 @@ const buildArtifact = (generated, input, ai) => {
     ...generated,
     capturePoint: input.capturePoint,
     origin: input.origin?.trim() || "field capture",
+    objectName: input.objectName?.trim() || undefined,
+    whyNow: input.whyNow?.trim() || undefined,
     collection: input.collection?.trim() || undefined,
     contextNote: input.whyNow?.trim() || undefined,
     preservationState: "active",
@@ -85,10 +88,16 @@ const buildArtifact = (generated, input, ai) => {
     ai,
   };
 
-  const result = ArtifactSchema.safeParse(artifact);
+  const artifactWithRecord = {
+    ...artifact,
+    record: normalizeArtifactRecord(artifact),
+  };
+
+  const result = ArtifactSchema.safeParse(artifactWithRecord);
   if (!result.success) {
     const fallback = generateFallbackArtifactPayload(input);
-    return ArtifactSchema.parse({ ...artifact, ...fallback, ai: { provider: "server", model: "fallback", usedFallback: true } });
+    const fallbackArtifact = { ...artifact, ...fallback, ai: { provider: "server", model: "fallback", usedFallback: true } };
+    return ArtifactSchema.parse({ ...fallbackArtifact, record: normalizeArtifactRecord(fallbackArtifact) });
   }
   return result.data;
 };

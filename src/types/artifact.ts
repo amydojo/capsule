@@ -20,6 +20,59 @@ export type ArtifactObservation = {
 
 export type ObjectBoundary = NormalizedBoundary;
 
+export type PressureTrace = {
+  compression: number;
+  familiarity: number;
+  fragility: number;
+  residue: number;
+  charge: number;
+  preservationNeed: number;
+};
+
+export type ArtifactRecord = {
+  identity: {
+    capsuleId: string;
+    createdAt: string;
+    userGivenName?: string;
+    systemArtifactName: string;
+    collection?: string;
+  };
+  source: {
+    originalImageDataUrl?: string;
+    specimenImageDataUrl?: string;
+    isolatedSpecimenDataUrl?: string;
+    artifactRenderDataUrl?: string;
+    objectBoundary?: ObjectBoundary;
+    userNote?: string;
+    origin?: string;
+  };
+  observedFacts: {
+    objectLabel: string;
+    visibleText: string[];
+    colors: string[];
+    shapeAndSilhouette: string[];
+    marksAndWear: string[];
+    materialTags: string[];
+    sceneContext?: string;
+  };
+  interpretiveLayer: {
+    artifactClass: string;
+    pressureTrace: PressureTrace;
+    continuityNote: string;
+    memoryHypothesis?: string;
+    toneTags?: string[];
+    doNotOverclaim: boolean;
+  };
+  modelProvenance: {
+    visionModel?: string;
+    detectorModel?: string;
+    segmentationModel?: string;
+    depthModel?: string;
+    embeddingModel?: string;
+    confidenceByField: Record<string, number>;
+  };
+};
+
 export type ArtifactExtraction = {
   method: ExtractionMethod;
   confidence: number;
@@ -84,6 +137,8 @@ export type Artifact = {
   classification: string;
   capturePoint: string;
   origin: string;
+  objectName?: string;
+  whyNow?: string;
   collection?: string;
   contextNote?: string;
   material: string[];
@@ -108,6 +163,7 @@ export type Artifact = {
   updatedAt: string;
   observations: ArtifactObservation[];
   timeline: ArtifactTimelineEvent[];
+  record?: ArtifactRecord;
   imageReferences?: Partial<Record<ArtifactImageField, ArtifactImageReference>>;
   storage?: ArtifactStorageDiagnostics;
   ai?: {

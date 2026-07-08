@@ -1,4 +1,5 @@
 import type { Artifact } from "../types/artifact";
+import { normalizeArtifactRecord } from "../utils/artifactRecord";
 import ContinuityBar from "./ContinuityBar";
 
 type MetadataTableProps = {
@@ -7,6 +8,7 @@ type MetadataTableProps = {
 };
 
 export default function MetadataTable({ artifact, preservationState = artifact.preservationState }: MetadataTableProps) {
+  const record = normalizeArtifactRecord(artifact);
   const extractionLabel = artifact.extraction
     ? artifact.extraction.method === "manual-object-field"
       ? `manual object field / ${Math.round(artifact.extraction.confidence * 100)}%`
@@ -17,12 +19,15 @@ export default function MetadataTable({ artifact, preservationState = artifact.p
         : "field preserved"
     : undefined;
 
-  const rows = [
-    ["Classification", artifact.classification],
-    ["Material", artifact.material.join(", ")],
-    ["Origin", artifact.origin],
-    ...(artifact.collection ? [["Collection", artifact.collection]] : []),
-    ...(artifact.contextNote ? [["Context Note", artifact.contextNote]] : []),
+  const materialTags = record.observedFacts.materialTags.join(", ") || "not classified";
+  const rows: Array<[string, string]> = [
+    ["Classification", record.interpretiveLayer.artifactClass],
+    ["Object Label", record.observedFacts.objectLabel],
+    ...(record.identity.userGivenName ? ([["User Given Name", record.identity.userGivenName]] as Array<[string, string]>) : []),
+    ["Material", materialTags],
+    ["Origin", record.source.origin || "not recorded"],
+    ...(record.identity.collection ? ([["Collection", record.identity.collection]] as Array<[string, string]>) : []),
+    ...(record.source.userNote ? ([["Context Note", record.source.userNote]] as Array<[string, string]>) : []),
     ["Capture Point", artifact.capturePoint],
     ["Condition", artifact.condition],
   ];

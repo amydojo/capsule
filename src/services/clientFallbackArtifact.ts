@@ -1,6 +1,7 @@
 import type { GeneratedArtifactPayload } from "../schemas/artifactSchema";
 import type { Artifact } from "../types/artifact";
 import type { CaptureInput } from "../types/capture";
+import { normalizeArtifactRecord } from "../utils/artifactRecord";
 
 const createId = (prefix = "evt") => {
   const randomId = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
@@ -85,11 +86,13 @@ export const generateClientFallbackArtifact = (input: CaptureInput): Artifact =>
       ? { method: "simulated-isolation" as const, confidence: 0.62, warnings: [] }
       : { method: "fallback" as const, confidence: 0.42, warnings: ["Object boundary was not provided."] };
 
-  return {
+  const artifact: Artifact = {
     id: createFossilId(),
     ...generated,
     capturePoint: input.capturePoint,
     origin: input.origin?.trim() || "field capture",
+    objectName: input.objectName?.trim() || undefined,
+    whyNow: input.whyNow?.trim() || undefined,
     collection: input.collection?.trim() || undefined,
     contextNote: input.whyNow?.trim() || undefined,
     preservationState: "active",
@@ -124,5 +127,10 @@ export const generateClientFallbackArtifact = (input: CaptureInput): Artifact =>
       model: "local-fallback",
       usedFallback: true,
     },
+  };
+
+  return {
+    ...artifact,
+    record: normalizeArtifactRecord(artifact),
   };
 };
