@@ -53,6 +53,8 @@ const buildArtifact = (generated, input, ai) => {
     ...generated,
     capturePoint: input.capturePoint,
     origin: input.origin?.trim() || "field capture",
+    collection: input.collection?.trim() || undefined,
+    contextNote: input.whyNow?.trim() || undefined,
     preservationState: "active",
     currentStage: "preserved",
     imageDataUrl: specimenImage,

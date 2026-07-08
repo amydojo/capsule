@@ -30,7 +30,7 @@ const inferMaterials = (objectName: string) => {
 };
 
 const inferClassification = (input: CaptureInput) => {
-  const text = `${input.objectName || "Object"} ${input.whyNow || ""} ${input.futureMemory || ""}`.toLowerCase();
+  const text = `${input.objectName || "Object"} ${input.whyNow || ""} ${input.futureMemory || ""} ${input.collection || ""}`.toLowerCase();
   if (/cat|dog|pet|remy|animal|companion/.test(text)) return "domestic presence record";
   if (/first|launch|start|beginning|idea|build|origin/.test(text)) return "origin artifact";
   if (/order|receipt|label|proof/.test(text)) return "transaction artifact";
@@ -90,6 +90,8 @@ export const generateClientFallbackArtifact = (input: CaptureInput): Artifact =>
     ...generated,
     capturePoint: input.capturePoint,
     origin: input.origin?.trim() || "field capture",
+    collection: input.collection?.trim() || undefined,
+    contextNote: input.whyNow?.trim() || undefined,
     preservationState: "active",
     currentStage: "preserved",
     imageDataUrl: specimenImage,

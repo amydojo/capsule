@@ -23,7 +23,29 @@ import {
   makeSpecimenThumbnail,
 } from "../utils/objectExtraction";
 
-type CapturePointStep = "camera" | "upload" | "object-ready" | "adjust-field" | "submitting" | "error";
+type CapturePointStep = "camera" | "upload" | "object-ready" | "context-lock" | "adjust-field" | "submitting" | "error";
+
+type ContextLockField = "objectName" | "whyKeepIt" | "origin" | "collection";
+
+type ContextLockFields = Record<ContextLockField, string>;
+
+const emptyContextLockFields: ContextLockFields = {
+  objectName: "",
+  whyKeepIt: "",
+  origin: "",
+  collection: "",
+};
+
+const contextLockFields: Array<{
+  id: ContextLockField;
+  label: string;
+  placeholder: string;
+}> = [
+  { id: "objectName", label: "Object name", placeholder: "what should Capsule call this?" },
+  { id: "whyKeepIt", label: "Why keep it?", placeholder: "small reason, not a whole story" },
+  { id: "origin", label: "Origin", placeholder: "desk, car, kitchen, Remy evidence..." },
+  { id: "collection", label: "Collection", placeholder: "desk objects, printed matter, Remy relics..." },
+];
 
 const formatCapturePoint = () =>
   new Intl.DateTimeFormat("en-US", {
@@ -34,6 +56,11 @@ const formatCapturePoint = () =>
     minute: "2-digit",
   }).format(new Date());
 
+const optionalContextValue = (value: string) => {
+  const trimmed = value.trim();
+  return trimmed || undefined;
+};
+
 export default function CapturePoint() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -43,6 +70,7 @@ export default function CapturePoint() {
   const [sourceImageDataUrl, setSourceImageDataUrl] = useState("");
   const [extractionResult, setExtractionResult] = useState<ExtractionResult | undefined>();
   const [specimenThumbnailDataUrl, setSpecimenThumbnailDataUrl] = useState("");
+  const [contextFields, setContextFields] = useState<ContextLockFields>(emptyContextLockFields);
   const [error, setError] = useState("");
   const [isProcessingImage, setIsProcessingImage] = useState(false);
 
@@ -143,6 +171,7 @@ export default function CapturePoint() {
     setSourceImageDataUrl("");
     setExtractionResult(undefined);
     setSpecimenThumbnailDataUrl("");
+    setContextFields(emptyContextLockFields);
     setError("");
     setStep("camera");
   };
@@ -150,6 +179,25 @@ export default function CapturePoint() {
   const goToUpload = () => {
     setError("");
     setStep("upload");
+  };
+
+  const updateContextField = (field: ContextLockField, value: string) => {
+    setContextFields((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const openContextLock = () => {
+    setError("");
+
+    if (!sourceImageDataUrl || !extractionResult) {
+      setError("Capture an object before preserving.");
+      setStep("error");
+      return;
+    }
+
+    setStep("context-lock");
   };
 
   const preserveObject = () => {
@@ -162,6 +210,11 @@ export default function CapturePoint() {
     }
 
     setStep("submitting");
+    const objectName = optionalContextValue(contextFields.objectName);
+    const whyNow = optionalContextValue(contextFields.whyKeepIt);
+    const origin = optionalContextValue(contextFields.origin);
+    const collection = optionalContextValue(contextFields.collection);
+
     const input: CaptureInput = {
       imageDataUrl: extractionResult.specimenImageDataUrl,
       sourceImageDataUrl: extractionResult.sourceImageDataUrl,
@@ -175,6 +228,10 @@ export default function CapturePoint() {
         createdAt: extractionResult.createdAt,
       },
       capturePoint: formatCapturePoint(),
+      ...(objectName ? { objectName } : {}),
+      ...(whyNow ? { whyNow } : {}),
+      ...(origin ? { origin } : {}),
+      ...(collection ? { collection } : {}),
     };
 
     startCapture(input);
@@ -246,7 +303,7 @@ export default function CapturePoint() {
               </div>
             </CaptureFrame>
             <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
-              <button type="button" onClick={preserveObject} className="hidden min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)] md:inline-flex md:items-center md:justify-center">
+              <button type="button" onClick={openContextLock} className="hidden min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)] md:inline-flex md:items-center md:justify-center">
                 Preserve Object
               </button>
               <button type="button" onClick={() => setStep("adjust-field")} className="device-control-button px-7 py-3.5 text-sm font-medium">Adjust Field</button>
@@ -263,11 +320,63 @@ export default function CapturePoint() {
           />
         )}
 
+        {step === "context-lock" && extractionResult && (
+          <div className="capsule-mode-archive mx-auto max-w-5xl overflow-hidden rounded-[1.75rem] border border-[var(--capsule-line)] text-[var(--capsule-graphite-black)] shadow-[0_28px_88px_rgba(0,0,0,0.2)]">
+            <div className="grid gap-0 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+              <div className="flex min-h-[24rem] items-center justify-center border-b border-[var(--capsule-line)] p-6 lg:border-b-0 lg:border-r">
+                <div className="capsule-surface-paper flex w-full max-w-sm flex-col items-center justify-center p-5">
+                  <p className="mono-label self-start text-[0.58rem] text-[var(--capsule-ash)]">Object field</p>
+                  <div className="relative mt-5 flex min-h-64 w-full items-center justify-center">
+                    <div className="absolute inset-x-[16%] bottom-8 h-10 rounded-[50%] bg-black/10 blur-2xl" aria-hidden="true" />
+                    <img src={specimenImageDataUrl} alt="Object field preview" className="relative max-h-72 max-w-full rounded-xl object-contain shadow-[0_26px_58px_rgba(23,25,28,0.14)]" />
+                  </div>
+                </div>
+              </div>
+              <form
+                className="flex flex-col justify-between gap-8 p-6 sm:p-8"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  preserveObject();
+                }}
+              >
+                <div>
+                  <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">CONTEXT LOCK</p>
+                  <h1 className="mt-3 text-3xl font-semibold tracking-[0.01em] text-[var(--capsule-graphite-black)] sm:text-4xl">{"Add what Capsule can\u2019t see."}</h1>
+                  <p className="mt-4 max-w-lg text-sm leading-6 text-[var(--capsule-ash)]">A few optional tags help the record stay attached to the real object.</p>
+
+                  <div className="mt-8 grid gap-4">
+                    {contextLockFields.map((field) => (
+                      <label key={field.id} className="block border-b capsule-hairline pb-3">
+                        <span className="mono-label text-[0.58rem] text-[var(--capsule-ash)]">{field.label}</span>
+                        <input
+                          value={contextFields[field.id]}
+                          onChange={(event) => updateContextField(field.id, event.target.value)}
+                          placeholder={field.placeholder}
+                          className="mt-2 w-full bg-transparent text-base text-[var(--capsule-graphite-black)] outline-none placeholder:text-[rgba(125,118,108,0.72)]"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <button type="submit" className="min-h-11 rounded-full bg-[var(--capsule-graphite)] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(23,25,28,0.18)]">
+                    Preserve Object
+                  </button>
+                  <button type="button" onClick={() => setStep("object-ready")} className="secondary-button px-7 py-3.5 text-sm font-medium">
+                    Back to Object Field
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
-        {showFixedPreserve && <MobileCaptureCTA type="button" label="Preserve Object" onClick={preserveObject} />}
+        {showFixedPreserve && <MobileCaptureCTA type="button" label="Preserve Object" onClick={openContextLock} />}
 
-        <div className={`mx-auto max-w-[78rem] ${showFixedPreserve || step === "submitting" || step === "adjust-field" ? "hidden md:block" : ""}`}>
+        <div className={`mx-auto max-w-[78rem] ${showFixedPreserve || step === "submitting" || step === "adjust-field" || step === "context-lock" ? "hidden md:block" : ""}`}>
           <BottomNav tone="dark" />
         </div>
       </section>

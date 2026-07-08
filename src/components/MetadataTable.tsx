@@ -21,6 +21,8 @@ export default function MetadataTable({ artifact, preservationState = artifact.p
     ["Classification", artifact.classification],
     ["Material", artifact.material.join(", ")],
     ["Origin", artifact.origin],
+    ...(artifact.collection ? [["Collection", artifact.collection]] : []),
+    ...(artifact.contextNote ? [["Context Note", artifact.contextNote]] : []),
     ["Capture Point", artifact.capturePoint],
     ["Condition", artifact.condition],
   ];

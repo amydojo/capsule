@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const optionalTrimmedString = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() || undefined : value),
+  z.string().min(1).optional(),
+);
+
 export const CaptureInputSchema = z.object({
   imageDataUrl: z.string().startsWith("data:image/"),
   sourceImageDataUrl: z.string().startsWith("data:image/").optional(),
@@ -25,10 +30,11 @@ export const CaptureInputSchema = z.object({
       createdAt: z.string().optional(),
     })
     .optional(),
-  objectName: z.string().trim().min(1).optional().default("Object"),
-  whyNow: z.string().trim().min(1).optional().default("Preserved from a Capsule capture."),
-  futureMemory: z.string().trim().min(1).optional().default("This object existed here and was worth preserving."),
-  origin: z.string().optional().default("field capture"),
+  objectName: optionalTrimmedString.default("Object"),
+  whyNow: optionalTrimmedString,
+  futureMemory: optionalTrimmedString,
+  origin: optionalTrimmedString.default("field capture"),
+  collection: optionalTrimmedString,
   capturePoint: z.string().min(1),
 });
 
@@ -80,6 +86,8 @@ export const ArtifactSchema = z.object({
   classification: z.string().min(1),
   capturePoint: z.string().min(1),
   origin: z.string(),
+  collection: z.string().optional(),
+  contextNote: z.string().optional(),
   material: z.array(z.string().min(1)).min(1),
   condition: z.string().min(1),
   visibleDetails: z.array(z.string().min(1)),

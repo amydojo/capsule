@@ -44,9 +44,10 @@ Rules:
 - No medical, legal, or identity claims.`;
 
 export const buildArtifactUserPrompt = (input) => `Object name: ${input.objectName}
-Why now: ${input.whyNow}
-What future-you should not forget: ${input.futureMemory}
+Why now: ${input.whyNow || "unspecified"}
+What future-you should not forget: ${input.futureMemory || "unspecified"}
 Origin: ${input.origin || "unspecified origin"}
+Collection: ${input.collection || "unspecified collection"}
 Capture Point: ${input.capturePoint}
 Image basis: ${input.specimenImageDataUrl ? "selected specimen region" : "capture image"}
 Object boundary: ${input.objectBoundary ? "manual object field supplied" : "not supplied"}
