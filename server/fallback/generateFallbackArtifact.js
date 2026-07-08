@@ -19,7 +19,7 @@ const inferMaterials = (objectName) => {
 };
 
 const inferClassification = (input) => {
-  const text = `${input.objectName} ${input.whyNow} ${input.futureMemory}`.toLowerCase();
+  const text = `${input.objectName || ""} ${input.whyNow || ""} ${input.futureMemory || ""} ${input.collection || ""}`.toLowerCase();
   if (/cat|dog|pet|remy|animal|companion/.test(text)) return "domestic presence record";
   if (/first|launch|start|beginning|idea|build|origin/.test(text)) return "origin artifact";
   if (/receipt|order|label|proof/.test(text)) return "transaction artifact";

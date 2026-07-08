@@ -15,6 +15,7 @@ export type CaptureInput = {
   whyNow?: string;
   futureMemory?: string;
   origin?: string;
+  collection?: string;
   capturePoint: string;
 };
 

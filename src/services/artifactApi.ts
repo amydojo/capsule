@@ -5,13 +5,19 @@ import { generateClientFallbackArtifact } from "./clientFallbackArtifact";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
+const optionalString = (value?: string) => {
+  const trimmed = value?.trim();
+  return trimmed || undefined;
+};
+
 export const normalizeCaptureInput = (input: CaptureInput): CaptureInput => ({
   ...input,
   imageDataUrl: input.specimenImageDataUrl || input.imageDataUrl,
-  objectName: input.objectName?.trim() || "Object",
-  origin: input.origin?.trim() || "field capture",
-  whyNow: input.whyNow?.trim() || "Preserved from a Capsule capture.",
-  futureMemory: input.futureMemory?.trim() || "This object existed here and was worth preserving.",
+  objectName: optionalString(input.objectName),
+  origin: optionalString(input.origin),
+  whyNow: optionalString(input.whyNow),
+  futureMemory: optionalString(input.futureMemory),
+  collection: optionalString(input.collection),
 });
 
 export const generateArtifact = async (input: CaptureInput): Promise<Artifact> => {

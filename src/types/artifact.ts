@@ -84,6 +84,8 @@ export type Artifact = {
   classification: string;
   capturePoint: string;
   origin: string;
+  collection?: string;
+  contextNote?: string;
   material: string[];
   condition: string;
   visibleDetails: string[];

@@ -96,6 +96,8 @@ export const ArtifactSchema = z.object({
   classification: z.string().min(1),
   capturePoint: z.string().min(1),
   origin: z.string(),
+  collection: z.string().optional(),
+  contextNote: z.string().optional(),
   material: z.array(z.string().min(1)).min(1),
   condition: z.string().min(1),
   visibleDetails: z.array(z.string().min(1)).default([]),
