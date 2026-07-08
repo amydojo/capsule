@@ -3,6 +3,7 @@ export const ROUTES = {
   capture: "/capture",
   rediscover: "/rediscover",
   chamber: "/chamber",
+  review: "/review",
 } as const;
 
 export const ARTIFACT_RECORD_PATH = "/artifact/:id";

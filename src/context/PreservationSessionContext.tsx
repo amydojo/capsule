@@ -1,5 +1,4 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { saveArtifact, type SaveArtifactOptions } from "../services/artifactStorage";
 import type { Artifact, PreservationStage } from "../types/artifact";
 import type { CaptureInput, PreservationSession } from "../types/capture";
 
@@ -8,7 +7,7 @@ type PreservationSessionContextValue = {
   startCapture: (input: CaptureInput) => PreservationSession;
   beginPreservation: () => void;
   setStageProgress: (stage: PreservationStage, progress: number) => void;
-  completePreservation: (artifact: Artifact, options?: SaveArtifactOptions) => Promise<Artifact>;
+  completePreservation: (artifact: Artifact) => Promise<Artifact>;
   failPreservation: (error: string) => void;
   resetSession: () => void;
 };
@@ -96,17 +95,16 @@ export function PreservationSessionProvider({ children }: { children: React.Reac
           progress,
         }));
       },
-      completePreservation: async (artifact, options) => {
-        const savedArtifact = await saveArtifact(artifact, options);
+      completePreservation: async (artifact) => {
         setSession((current) => ({
           ...current,
           status: "complete",
-          artifact: savedArtifact,
+          artifact,
           activeStage: "preserved",
           progress: 100,
           error: undefined,
         }));
-        return savedArtifact;
+        return artifact;
       },
       failPreservation: (error) => {
         setSession((current) => ({
