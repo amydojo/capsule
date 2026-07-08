@@ -7,7 +7,7 @@ import PreservationStageLine from "../components/PreservationStageLine";
 import ScanChecklist from "../components/ScanChecklist";
 import SpecimenStage from "../components/SpecimenStage";
 import TopBar from "../components/TopBar";
-import { getArtifactRoute, ROUTES } from "../constants/navigation";
+import { ROUTES } from "../constants/navigation";
 import { usePreservationSession } from "../context/PreservationSessionContext";
 import { primaryArtifact } from "../data/artifacts";
 import { generateArtifact } from "../services/artifactApi";
@@ -95,7 +95,7 @@ export default function PreservationChamber() {
         stageTimers.forEach((timer) => window.clearTimeout(timer));
         stageTimersRef.current = [];
         setStageProgress("preserved", 100);
-        await completePreservation(artifact, { retryAttempt });
+        await completePreservation(artifact);
       } catch (error) {
         stageTimers.forEach((timer) => window.clearTimeout(timer));
         stageTimersRef.current = [];
@@ -136,7 +136,7 @@ export default function PreservationChamber() {
     if (!isComplete || !session.artifact) return;
     if (artifactTimerRef.current) window.clearTimeout(artifactTimerRef.current);
     artifactTimerRef.current = window.setTimeout(() => {
-      if (session.artifact) navigate(getArtifactRoute(session.artifact.id));
+      if (session.artifact) navigate(ROUTES.review);
     }, 1100);
 
     return () => {
@@ -234,8 +234,8 @@ export default function PreservationChamber() {
             {activeInput && session.status === "intake" && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preparing Object...</button>}
             {isPreserving && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preserving Object...</button>}
             {isComplete && session.artifact && (
-              <button onClick={() => session.artifact && navigate(getArtifactRoute(session.artifact.id))} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-                Open Artifact
+              <button onClick={() => navigate(ROUTES.review)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
+                Review Artifact
               </button>
             )}
             {session.status === "error" && activeInput && (
