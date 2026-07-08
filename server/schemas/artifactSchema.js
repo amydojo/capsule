@@ -5,6 +5,14 @@ const optionalTrimmedString = z.preprocess(
   z.string().min(1).optional(),
 );
 
+const ObjectBoundarySchema = z.object({
+  x: z.coerce.number().min(0).max(1),
+  y: z.coerce.number().min(0).max(1),
+  width: z.coerce.number().min(0).max(1),
+  height: z.coerce.number().min(0).max(1),
+  unit: z.literal("normalized"),
+});
+
 export const CaptureInputSchema = z.object({
   imageDataUrl: z.string().startsWith("data:image/"),
   sourceImageDataUrl: z.string().startsWith("data:image/").optional(),
@@ -13,15 +21,7 @@ export const CaptureInputSchema = z.object({
   pristineSpecimenDataUrl: z.string().startsWith("data:image/").optional(),
   artifactRenderDataUrl: z.string().startsWith("data:image/").optional(),
   thumbnailDataUrl: z.string().startsWith("data:image/").optional(),
-  objectBoundary: z
-    .object({
-      x: z.coerce.number().min(0).max(1),
-      y: z.coerce.number().min(0).max(1),
-      width: z.coerce.number().min(0).max(1),
-      height: z.coerce.number().min(0).max(1),
-      unit: z.literal("normalized"),
-    })
-    .optional(),
+  objectBoundary: ObjectBoundarySchema.optional(),
   extraction: z
     .object({
       method: z.enum(["manual-object-field", "assisted-object-field", "simulated-isolation", "fallback"]),
@@ -78,6 +78,59 @@ export const ArtifactRenderMetadataSchema = z.object({
   provider: z.enum(["openai", "local", "none"]).optional(),
 });
 
+export const PressureTraceSchema = z.object({
+  compression: z.coerce.number().min(0).max(1),
+  familiarity: z.coerce.number().min(0).max(1),
+  fragility: z.coerce.number().min(0).max(1),
+  residue: z.coerce.number().min(0).max(1),
+  charge: z.coerce.number().min(0).max(1),
+  preservationNeed: z.coerce.number().min(0).max(1),
+});
+
+export const ArtifactRecordSchema = z.object({
+  identity: z.object({
+    capsuleId: z.string().min(1),
+    createdAt: z.string().min(1),
+    userGivenName: z.string().min(1).optional(),
+    systemArtifactName: z.string().min(1),
+    collection: z.string().min(1).optional(),
+  }),
+  source: z.object({
+    originalImageDataUrl: z.string().optional(),
+    specimenImageDataUrl: z.string().optional(),
+    isolatedSpecimenDataUrl: z.string().optional(),
+    artifactRenderDataUrl: z.string().optional(),
+    objectBoundary: ObjectBoundarySchema.optional(),
+    userNote: z.string().min(1).optional(),
+    origin: z.string().min(1).optional(),
+  }),
+  observedFacts: z.object({
+    objectLabel: z.string().min(1),
+    visibleText: z.array(z.string()).default([]),
+    colors: z.array(z.string()).default([]),
+    shapeAndSilhouette: z.array(z.string()).default([]),
+    marksAndWear: z.array(z.string()).default([]),
+    materialTags: z.array(z.string()).default([]),
+    sceneContext: z.string().min(1).optional(),
+  }),
+  interpretiveLayer: z.object({
+    artifactClass: z.string().min(1),
+    pressureTrace: PressureTraceSchema,
+    continuityNote: z.string().min(1),
+    memoryHypothesis: z.string().min(1).optional(),
+    toneTags: z.array(z.string()).optional(),
+    doNotOverclaim: z.boolean(),
+  }),
+  modelProvenance: z.object({
+    visionModel: z.string().min(1).optional(),
+    detectorModel: z.string().min(1).optional(),
+    segmentationModel: z.string().min(1).optional(),
+    depthModel: z.string().min(1).optional(),
+    embeddingModel: z.string().min(1).optional(),
+    confidenceByField: z.record(z.string(), z.coerce.number().min(0).max(1)),
+  }),
+});
+
 export const ArtifactSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -86,6 +139,8 @@ export const ArtifactSchema = z.object({
   classification: z.string().min(1),
   capturePoint: z.string().min(1),
   origin: z.string(),
+  objectName: z.string().optional(),
+  whyNow: z.string().optional(),
   collection: z.string().optional(),
   contextNote: z.string().optional(),
   material: z.array(z.string().min(1)).min(1),
@@ -103,14 +158,13 @@ export const ArtifactSchema = z.object({
   pristineSpecimenDataUrl: z.string().optional(),
   artifactRenderDataUrl: z.string().optional(),
   thumbnailDataUrl: z.string().optional(),
-  objectBoundary: z
-    .object({ x: z.number(), y: z.number(), width: z.number(), height: z.number(), unit: z.literal("normalized") })
-    .optional(),
+  objectBoundary: ObjectBoundarySchema.optional(),
   extraction: ArtifactExtractionSchema.optional(),
   render: ArtifactRenderMetadataSchema.optional(),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
   observations: z.array(z.object({ id: z.string(), text: z.string(), createdAt: z.string() })),
   timeline: z.array(z.object({ id: z.string(), stage: z.string(), label: z.string(), description: z.string(), date: z.string() })),
+  record: ArtifactRecordSchema.optional(),
   ai: z.object({ provider: z.string(), model: z.string(), usedFallback: z.boolean() }).optional(),
 });

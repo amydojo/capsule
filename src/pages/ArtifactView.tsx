@@ -5,12 +5,13 @@ import ArtifactActions from "../components/ArtifactActions";
 import BottomNav from "../components/BottomNav";
 import MetadataTable from "../components/MetadataTable";
 import PreservationField from "../components/PreservationField";
-import SourceCapturePreview from "../components/SourceCapturePreview";
+import SourceEvidenceSlip from "../components/artifact/SourceEvidenceSlip";
 import TopBar from "../components/TopBar";
 import { ROUTES } from "../constants/navigation";
 import { addObservation, loadArtifact, sealArtifact } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
 import { getArtifactHeroImage, getArtifactSourceImage } from "../utils/artifactImage";
+import { normalizeArtifactRecord } from "../utils/artifactRecord";
 
 const polishVisibleDetail = (detail: string) => {
   const normalized = detail.toLowerCase();
@@ -26,6 +27,19 @@ const formatBytes = (bytes?: number) => {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 102.4) / 10} KB`;
   return `${Math.round(bytes / 1024 / 102.4) / 10} MB`;
 };
+
+const formatPercent = (value: number) => `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`;
+
+const formatFieldLabel = (value: string) =>
+  value
+    .replace(/\./g, " / ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+
+const formatPressureLabel = (value: string) =>
+  value
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 
 export default function ArtifactView() {
   const { id } = useParams();
@@ -84,10 +98,48 @@ export default function ArtifactView() {
   }
 
   const sealed = artifact.preservationState === "sealed";
+  const artifactRecord = normalizeArtifactRecord(artifact);
+  const recordTitle = artifactRecord.identity.userGivenName || artifactRecord.identity.systemArtifactName;
   const heroImage = getArtifactHeroImage(artifact);
   const sourceImage = getArtifactSourceImage(artifact);
   const provenanceImage = sourceImage && sourceImage !== heroImage ? sourceImage : undefined;
-  const visibleDetails = artifact.visibleDetails.map(polishVisibleDetail);
+  const visibleDetails = artifactRecord.observedFacts.shapeAndSilhouette.map(polishVisibleDetail);
+  const marksAndWear = artifactRecord.observedFacts.marksAndWear.map(polishVisibleDetail);
+  const observedRows: Array<[string, string]> = [
+    ["Object label", artifactRecord.observedFacts.objectLabel],
+    ["Materials", artifactRecord.observedFacts.materialTags.join(", ") || "not classified"],
+    ...(artifactRecord.observedFacts.colors.length ? ([["Colors", artifactRecord.observedFacts.colors.join(", ")]] as Array<[string, string]>) : []),
+    ...(artifactRecord.observedFacts.visibleText.length ? ([["Visible text", artifactRecord.observedFacts.visibleText.join(", ")]] as Array<[string, string]>) : []),
+    ...(artifactRecord.observedFacts.sceneContext ? ([["Scene context", artifactRecord.observedFacts.sceneContext]] as Array<[string, string]>) : []),
+  ];
+  const userContextRows: Array<[string, string]> = [
+    ...(artifactRecord.identity.userGivenName ? ([["Object name", artifactRecord.identity.userGivenName]] as Array<[string, string]>) : []),
+    ...(artifactRecord.source.userNote ? ([["Why keep it", artifactRecord.source.userNote]] as Array<[string, string]>) : []),
+    ...(artifactRecord.source.origin ? ([["Origin", artifactRecord.source.origin]] as Array<[string, string]>) : []),
+    ...(artifactRecord.identity.collection ? ([["Collection", artifactRecord.identity.collection]] as Array<[string, string]>) : []),
+  ];
+  const pressureTraceRows = Object.entries(artifactRecord.interpretiveLayer.pressureTrace).map(
+    ([label, value]) => [formatPressureLabel(label), formatPercent(value)] as [string, string],
+  );
+  const confidenceRows = Object.entries(artifactRecord.modelProvenance.confidenceByField).map(
+    ([label, value]) => [formatFieldLabel(label), formatPercent(value)] as [string, string],
+  );
+  const modelRows: Array<[string, string]> = [
+    ...(artifactRecord.modelProvenance.visionModel ? ([["Vision model", artifactRecord.modelProvenance.visionModel]] as Array<[string, string]>) : []),
+    ...(artifactRecord.modelProvenance.detectorModel ? ([["Detector model", artifactRecord.modelProvenance.detectorModel]] as Array<[string, string]>) : []),
+    ...(artifactRecord.modelProvenance.segmentationModel ? ([["Segmentation model", artifactRecord.modelProvenance.segmentationModel]] as Array<[string, string]>) : []),
+    ...(artifactRecord.modelProvenance.depthModel ? ([["Depth model", artifactRecord.modelProvenance.depthModel]] as Array<[string, string]>) : []),
+    ...(artifactRecord.modelProvenance.embeddingModel ? ([["Embedding model", artifactRecord.modelProvenance.embeddingModel]] as Array<[string, string]>) : []),
+    ...(artifact.ai ? ([[artifact.ai.usedFallback ? "Generator" : "Provider", `${artifact.ai.provider} / ${artifact.ai.model}`]] as Array<[string, string]>) : []),
+  ];
+  const sourceEvidenceImage = artifactRecord.source.originalImageDataUrl || provenanceImage;
+  const sourceEvidenceMetrics = [
+    { label: "Original", value: artifactRecord.source.originalImageDataUrl ? "retained" : "not recorded" },
+    { label: "Specimen", value: artifactRecord.source.specimenImageDataUrl ? "retained" : "not recorded" },
+    { label: "Isolated", value: artifactRecord.source.isolatedSpecimenDataUrl ? "retained" : "not recorded" },
+    { label: "Render", value: artifactRecord.source.artifactRenderDataUrl ? "retained" : "not recorded" },
+    { label: "Boundary", value: artifactRecord.source.objectBoundary ? "recorded" : "not recorded" },
+  ];
   const renderLabel =
     artifact.render?.pristineStatus === "success" && artifact.pristineSpecimenDataUrl
       ? "Pristine specimen"
@@ -120,12 +172,12 @@ export default function ArtifactView() {
             <span className="h-2 w-2 rounded-full bg-[var(--capsule-mineral-olive)] shadow-[0_0_0_6px_var(--capsule-mineral-olive-soft)]" />
             <span className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">ARTIFACT</span>
           </div>
-          <h1 className="mt-4 text-3xl font-semibold uppercase tracking-[0.035em] sm:text-6xl">{artifact.title}</h1>
+          <h1 className="mt-4 text-3xl font-semibold uppercase tracking-[0.035em] sm:text-6xl">{recordTitle}</h1>
           <p className="mt-3 font-mono text-xs uppercase tracking-[0.18em] text-[var(--capsule-ash)]">Preserved {artifact.capturePoint}</p>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--capsule-ash)] sm:mt-6 sm:text-xl sm:leading-9">{artifact.essence}</p>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--capsule-ash)] sm:mt-6 sm:text-xl sm:leading-9">{artifactRecord.interpretiveLayer.continuityNote}</p>
         </div>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <PreservationField mode="record" imageDataUrl={heroImage} imageAlt={artifact.title} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
+          <PreservationField mode="record" imageDataUrl={heroImage} imageAlt={recordTitle} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
         </motion.div>
         <div className="mt-10 sm:mt-14">
           <ArtifactActions
@@ -155,24 +207,117 @@ export default function ArtifactView() {
         </div>
 
         <details className="mx-auto mt-14 max-w-4xl border-t border-[var(--capsule-line)] pt-8 sm:mt-20 sm:pt-10">
-          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Record Details</summary>
-          <div className="mt-6 grid gap-8 md:grid-cols-2">
-            <div>
-              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Visible Details</p>
-              <ul className="mt-5 space-y-3 text-sm leading-6 text-[var(--capsule-graphite)]">
-                {visibleDetails.map((detail, index) => (
-                  <li key={`${detail}-${index}`} className="border-b border-[rgba(229,226,220,0.62)] pb-3">{detail}</li>
+          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Record v2</summary>
+          <div className="mt-6 space-y-10">
+            <section>
+              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Observed by Capsule</p>
+              <dl className="mt-5 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
+                {observedRows.map(([label, value]) => (
+                  <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
+                    <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
+                    <dd className="mt-1">{value}</dd>
+                  </div>
                 ))}
-              </ul>
-            </div>
-            <div>
-              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Continuity Note</p>
-              <p className="mt-5 text-sm leading-7 text-[var(--capsule-graphite)]">{artifact.emotionalHypothesis}</p>
-            </div>
+              </dl>
+              {visibleDetails.length ? (
+                <div className="mt-6">
+                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Shape and silhouette</p>
+                  <ul className="mt-3 space-y-3 text-sm leading-6 text-[var(--capsule-graphite)]">
+                    {visibleDetails.map((detail, index) => (
+                      <li key={`${detail}-${index}`} className="border-b border-[rgba(229,226,220,0.62)] pb-3">{detail}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {marksAndWear.length ? (
+                <div className="mt-6">
+                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Marks and wear</p>
+                  <ul className="mt-3 space-y-3 text-sm leading-6 text-[var(--capsule-graphite)]">
+                    {marksAndWear.map((detail, index) => (
+                      <li key={`${detail}-${index}`} className="border-b border-[rgba(229,226,220,0.62)] pb-3">{detail}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </section>
+
+            <section>
+              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">User Context</p>
+              {userContextRows.length ? (
+                <dl className="mt-5 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
+                  {userContextRows.map(([label, value]) => (
+                    <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
+                      <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
+                      <dd className="mt-1">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : (
+                <p className="mt-5 text-sm leading-6 text-[var(--capsule-ash)]">No user context attached.</p>
+              )}
+            </section>
+
+            <section>
+              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Inferred by Capsule</p>
+              <div className="mt-5 grid gap-8 md:grid-cols-2">
+                <div>
+                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Continuity note</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--capsule-graphite)]">{artifactRecord.interpretiveLayer.continuityNote}</p>
+                  {artifactRecord.interpretiveLayer.memoryHypothesis && (
+                    <>
+                      <p className="mt-6 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Memory hypothesis</p>
+                      <p className="mt-3 text-sm leading-7 text-[var(--capsule-graphite)]">{artifactRecord.interpretiveLayer.memoryHypothesis}</p>
+                    </>
+                  )}
+                  <p className="mt-6 text-xs leading-5 text-[var(--capsule-ash)]">
+                    {artifactRecord.interpretiveLayer.doNotOverclaim ? "Interpretation marked cautious." : "Interpretation caution flag not set."}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Pressure trace</p>
+                  <dl className="mt-3 space-y-3 text-sm text-[var(--capsule-graphite)]">
+                    {pressureTraceRows.map(([label, value]) => (
+                      <div key={label} className="grid grid-cols-[minmax(0,1fr)_4rem] gap-4 border-b border-[rgba(229,226,220,0.62)] pb-3">
+                        <dt>{label}</dt>
+                        <dd className="text-right font-mono text-xs text-[var(--capsule-ash)]">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Model Provenance</p>
+              {modelRows.length ? (
+                <dl className="mt-5 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
+                  {modelRows.map(([label, value]) => (
+                    <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
+                      <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
+                      <dd className="mt-1">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : (
+                <p className="mt-5 text-sm leading-6 text-[var(--capsule-ash)]">No model metadata recorded.</p>
+              )}
+              <dl className="mt-6 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
+                {confidenceRows.map(([label, value]) => (
+                  <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
+                    <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
+                    <dd className="mt-1 font-mono text-xs">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
           </div>
         </details>
 
-        {provenanceImage && <SourceCapturePreview sourceImageDataUrl={provenanceImage} title={artifact.title} />}
+        {sourceEvidenceImage && (
+          <div className="mx-auto mt-16 max-w-4xl">
+            <SourceEvidenceSlip title="Source Evidence" sourceImageSrc={sourceEvidenceImage} sourceImageAlt={`${recordTitle} source evidence`} metrics={sourceEvidenceMetrics} />
+          </div>
+        )}
 
         <details ref={timelineRef} className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
           <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Timeline</summary>

@@ -88,6 +88,59 @@ export const ArtifactStorageDiagnosticsSchema = z.object({
   createdAt: z.string().min(1),
 });
 
+export const PressureTraceSchema = z.object({
+  compression: z.coerce.number().min(0).max(1),
+  familiarity: z.coerce.number().min(0).max(1),
+  fragility: z.coerce.number().min(0).max(1),
+  residue: z.coerce.number().min(0).max(1),
+  charge: z.coerce.number().min(0).max(1),
+  preservationNeed: z.coerce.number().min(0).max(1),
+});
+
+export const ArtifactRecordSchema = z.object({
+  identity: z.object({
+    capsuleId: z.string().min(1),
+    createdAt: z.string().min(1),
+    userGivenName: z.string().min(1).optional(),
+    systemArtifactName: z.string().min(1),
+    collection: z.string().min(1).optional(),
+  }),
+  source: z.object({
+    originalImageDataUrl: z.string().optional(),
+    specimenImageDataUrl: z.string().optional(),
+    isolatedSpecimenDataUrl: z.string().optional(),
+    artifactRenderDataUrl: z.string().optional(),
+    objectBoundary: ObjectBoundarySchema.optional(),
+    userNote: z.string().min(1).optional(),
+    origin: z.string().min(1).optional(),
+  }),
+  observedFacts: z.object({
+    objectLabel: z.string().min(1),
+    visibleText: z.array(z.string()).default([]),
+    colors: z.array(z.string()).default([]),
+    shapeAndSilhouette: z.array(z.string()).default([]),
+    marksAndWear: z.array(z.string()).default([]),
+    materialTags: z.array(z.string()).default([]),
+    sceneContext: z.string().min(1).optional(),
+  }),
+  interpretiveLayer: z.object({
+    artifactClass: z.string().min(1),
+    pressureTrace: PressureTraceSchema,
+    continuityNote: z.string().min(1),
+    memoryHypothesis: z.string().min(1).optional(),
+    toneTags: z.array(z.string()).optional(),
+    doNotOverclaim: z.boolean(),
+  }),
+  modelProvenance: z.object({
+    visionModel: z.string().min(1).optional(),
+    detectorModel: z.string().min(1).optional(),
+    segmentationModel: z.string().min(1).optional(),
+    depthModel: z.string().min(1).optional(),
+    embeddingModel: z.string().min(1).optional(),
+    confidenceByField: z.record(z.string(), z.coerce.number().min(0).max(1)),
+  }),
+});
+
 export const ArtifactSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -96,6 +149,8 @@ export const ArtifactSchema = z.object({
   classification: z.string().min(1),
   capturePoint: z.string().min(1),
   origin: z.string(),
+  objectName: z.string().optional(),
+  whyNow: z.string().optional(),
   collection: z.string().optional(),
   contextNote: z.string().optional(),
   material: z.array(z.string().min(1)).min(1),
@@ -120,6 +175,7 @@ export const ArtifactSchema = z.object({
   updatedAt: z.string().min(1),
   observations: z.array(ArtifactObservationSchema),
   timeline: z.array(ArtifactTimelineEventSchema),
+  record: ArtifactRecordSchema.optional(),
   imageReferences: z.record(z.string(), ArtifactImageReferenceSchema).optional(),
   storage: ArtifactStorageDiagnosticsSchema.optional(),
   ai: z
@@ -136,3 +192,4 @@ export const ArtifactResponseSchema = z.object({
 });
 
 export type GeneratedArtifactPayload = z.infer<typeof GeneratedArtifactSchema>;
+export type ArtifactRecordPayload = z.infer<typeof ArtifactRecordSchema>;
