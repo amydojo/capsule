@@ -1,0 +1,342 @@
+.artifact-record-screen {
+  --artifact-record-rule: rgba(17, 16, 17, var(--capsule-hairline-opacity));
+  padding-bottom: 0.25rem;
+}
+
+.artifact-record-topbar {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 1.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.65rem;
+}
+
+.artifact-record-icon-button {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 1px solid var(--artifact-record-rule);
+  border-radius: 999px;
+  background: var(--capsule-paper);
+  color: var(--capsule-black);
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.artifact-record-accession {
+  min-width: 0;
+  color: var(--capsule-muted);
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.artifact-record-hero {
+  margin-top: 1.2rem;
+}
+
+.artifact-record-hero .artifact-record-hero__plate {
+  min-height: 220px;
+  padding: 0.82rem;
+  border-color: var(--artifact-record-rule);
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, 0.62), transparent 8rem),
+    var(--capsule-paper);
+}
+
+.artifact-record-hero .artifact-record-hero__plate > div:last-of-type {
+  min-height: 178px;
+}
+
+.artifact-record-hero .artifact-record-hero__plate img {
+  max-width: 68% !important;
+  max-height: 128px !important;
+}
+
+.artifact-record-hero__ruler {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.18rem;
+  margin-top: 0.65rem;
+}
+
+.artifact-record-hero__ruler span {
+  height: 1px;
+  background: var(--artifact-record-rule);
+}
+
+.artifact-record-identity {
+  margin-top: 1.05rem;
+}
+
+.artifact-record-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.artifact-record-title {
+  color: var(--capsule-black);
+  font-size: 1.42rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 0.98;
+}
+
+.artifact-record-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-bottom: 0.14rem;
+  color: var(--capsule-muted);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.artifact-record-state::before {
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 999px;
+  background: var(--capsule-red);
+  content: "";
+}
+
+.artifact-record-subline {
+  margin-top: 0.55rem;
+  color: var(--capsule-muted);
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.artifact-record-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 0.95rem;
+  border-top: 1px solid var(--artifact-record-rule);
+  border-bottom: 1px solid var(--artifact-record-rule);
+}
+
+.artifact-record-rail__cell {
+  min-width: 0;
+  padding: 0.62rem 0.48rem 0.7rem;
+  border-right: 1px solid var(--artifact-record-rule);
+}
+
+.artifact-record-rail__cell:last-child {
+  border-right: 0;
+}
+
+.artifact-record-rail__label {
+  color: var(--capsule-muted);
+  font-family: var(--font-mono);
+  font-size: 0.44rem;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.artifact-record-rail__value {
+  display: -webkit-box;
+  margin-top: 0.42rem;
+  overflow: hidden;
+  color: var(--capsule-black);
+  font-size: 0.55rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.artifact-record-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.95rem;
+}
+
+.artifact-record-action {
+  display: flex;
+  min-width: 0;
+  height: 2.05rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--artifact-record-rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--capsule-muted);
+  font-size: 0.54rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.artifact-record-action-primary {
+  border-color: var(--capsule-black);
+  background: var(--capsule-black);
+  color: var(--capsule-cream);
+}
+
+.artifact-record-divider {
+  margin-top: 1rem;
+  border-top: 1px solid var(--artifact-record-rule);
+}
+
+.artifact-record-section {
+  padding-top: 1rem;
+  border-top: 1px solid var(--artifact-record-rule);
+}
+
+.artifact-record-section + .artifact-record-section {
+  margin-top: 1rem;
+}
+
+.artifact-record-section__label {
+  color: var(--capsule-red);
+  font-family: var(--font-mono);
+  font-size: 0.46rem;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.artifact-record-rows {
+  display: grid;
+  gap: 0.52rem;
+  margin-top: 0.82rem;
+}
+
+.artifact-record-row {
+  display: grid;
+  grid-template-columns: minmax(4.75rem, 0.45fr) minmax(0, 1fr);
+  gap: 0.7rem;
+  padding-bottom: 0.52rem;
+  border-bottom: 1px solid var(--artifact-record-rule);
+}
+
+.artifact-record-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.artifact-record-row__label {
+  color: var(--capsule-muted);
+  font-family: var(--font-mono);
+  font-size: 0.44rem;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.artifact-record-row__value {
+  color: var(--capsule-black);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.artifact-record-evidence-grid {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: 0.82rem;
+  align-items: center;
+  margin-top: 0.85rem;
+}
+
+.artifact-record-evidence-grid__thumb {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--artifact-record-rule);
+  border-radius: 0.8rem;
+  background: var(--capsule-paper);
+}
+
+.artifact-record-evidence-grid__thumb img {
+  max-width: 78%;
+  max-height: 78%;
+  object-fit: contain;
+}
+
+.artifact-record-related {
+  display: grid;
+  grid-template-columns: 4.25rem minmax(0, 1fr);
+  gap: 0.82rem;
+  align-items: center;
+  margin-top: 0.85rem;
+}
+
+.artifact-record-related__plate {
+  min-height: 4.25rem;
+  padding: 0.35rem;
+}
+
+.artifact-record-related__plate > div:last-of-type {
+  min-height: 3.25rem;
+}
+
+.artifact-record-related__plate img {
+  max-width: 72% !important;
+  max-height: 2.65rem !important;
+}
+
+.artifact-record-related__title {
+  color: var(--capsule-black);
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.artifact-record-related__meta {
+  margin-top: 0.35rem;
+  color: var(--capsule-muted);
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.artifact-record-observation {
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  border: 1px solid var(--artifact-record-rule);
+  border-radius: 1rem;
+  background: var(--capsule-paper);
+}
+
+.artifact-record-observation textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  margin-top: 0.7rem;
+  resize: none;
+  border: 0;
+  border-bottom: 1px solid var(--artifact-record-rule);
+  background: transparent;
+  color: var(--capsule-black);
+  font-size: 0.7rem;
+  line-height: 1.45;
+  outline: none;
+}
+
+.artifact-record-detail {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--artifact-record-rule);
+}
+
+.artifact-record-detail summary {
+  cursor: pointer;
+  color: var(--capsule-muted);
+  font-family: var(--font-mono);
+  font-size: 0.46rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
