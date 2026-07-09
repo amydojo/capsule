@@ -8,7 +8,7 @@ type PressureTraceProps = {
 
 export default function PressureTrace({ compact = false, strong = false, tone = "light" }: PressureTraceProps) {
   const size = compact ? "h-52 w-72" : strong ? "h-[29rem] w-[44rem] max-w-[90%]" : "h-[25rem] w-[39rem] max-w-[88%]";
-  const traceBorder = tone === "dark" ? "border-[rgba(101,112,255,0.24)]" : "border-[rgba(101,112,255,0.16)]";
+  const traceBorder = tone === "dark" ? "border-[rgba(96,112,123,0.24)]" : "border-[rgba(96,112,123,0.16)]";
 
   return (
     <>

@@ -39,11 +39,11 @@ export default function SpecimenStage({
     <div
       className={`relative isolate flex items-center justify-center overflow-hidden border ${shellTone} ${stageHeight}`}
     >
-      <div className={dark ? "absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(242,239,234,0.09),transparent_18rem),radial-gradient(ellipse_at_50%_56%,rgba(101,112,255,0.14),transparent_22rem),radial-gradient(ellipse_at_50%_78%,rgba(0,0,0,0.82),transparent_32rem)]" : "absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,1),transparent_24rem),radial-gradient(ellipse_at_50%_57%,rgba(101,112,255,0.07),transparent_20rem),radial-gradient(ellipse_at_50%_73%,rgba(23,25,28,0.065),transparent_34rem)]"} aria-hidden="true" />
+      <div className={dark ? "absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(242,239,234,0.09),transparent_18rem),radial-gradient(ellipse_at_50%_56%,rgba(96,112,123,0.14),transparent_22rem),radial-gradient(ellipse_at_50%_78%,rgba(0,0,0,0.82),transparent_32rem)]" : "absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,1),transparent_24rem),radial-gradient(ellipse_at_50%_57%,rgba(96,112,123,0.07),transparent_20rem),radial-gradient(ellipse_at_50%_73%,rgba(23,25,28,0.065),transparent_34rem)]"} aria-hidden="true" />
       <div className={`quiet-grid absolute inset-0 ${dark ? "opacity-[0.035]" : "opacity-[0.06]"}`} aria-hidden="true" />
       <div className={dark ? "absolute inset-3 rounded-[2rem] border border-white/[0.09] bg-white/[0.018] shadow-[inset_0_0_70px_rgba(242,239,234,0.07),inset_0_-36px_66px_rgba(0,0,0,0.62)] sm:inset-6" : "absolute inset-3 rounded-[2.35rem] border border-white/85 bg-white/[0.07] shadow-[inset_0_0_70px_rgba(255,255,255,0.92),inset_0_-26px_54px_rgba(23,25,28,0.035)] sm:inset-6"} aria-hidden="true" />
-      <div className={dark ? "absolute left-1/2 top-[17%] h-10 w-[72%] -translate-x-1/2 rounded-[50%] border border-[rgba(242,239,234,0.2)] bg-[rgba(242,239,234,0.035)] shadow-[0_0_34px_rgba(242,239,234,0.16),0_0_70px_rgba(101,112,255,0.16)]" : "absolute inset-8 rounded-[2rem] border border-[rgba(255,255,255,0.72)] shadow-[inset_0_0_0_1px_rgba(229,226,220,0.42),inset_0_18px_40px_rgba(255,255,255,0.58),inset_0_-30px_70px_rgba(23,25,28,0.045)]"} aria-hidden="true" />
-      {dark && <div className="absolute left-1/2 bottom-[17%] h-12 w-[76%] -translate-x-1/2 rounded-[50%] border border-[rgba(242,239,234,0.18)] bg-[rgba(242,239,234,0.028)] shadow-[0_0_44px_rgba(242,239,234,0.12),0_0_82px_rgba(101,112,255,0.16)]" aria-hidden="true" />}
+      <div className={dark ? "absolute left-1/2 top-[17%] h-10 w-[72%] -translate-x-1/2 rounded-[50%] border border-[rgba(242,239,234,0.2)] bg-[rgba(242,239,234,0.035)] shadow-[0_0_34px_rgba(242,239,234,0.16),0_0_70px_rgba(96,112,123,0.16)]" : "absolute inset-8 rounded-[2rem] border border-[rgba(255,255,255,0.72)] shadow-[inset_0_0_0_1px_rgba(229,226,220,0.42),inset_0_18px_40px_rgba(255,255,255,0.58),inset_0_-30px_70px_rgba(23,25,28,0.045)]"} aria-hidden="true" />
+      {dark && <div className="absolute left-1/2 bottom-[17%] h-12 w-[76%] -translate-x-1/2 rounded-[50%] border border-[rgba(242,239,234,0.18)] bg-[rgba(242,239,234,0.028)] shadow-[0_0_44px_rgba(242,239,234,0.12),0_0_82px_rgba(96,112,123,0.16)]" aria-hidden="true" />}
       {!dark && <div className="absolute inset-x-[8%] top-[11%] h-[70%] rounded-[48%] border border-[rgba(221,216,206,0.56)] bg-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),inset_0_-30px_70px_rgba(23,25,28,0.04)]" aria-hidden="true" />}
       <div className={`${dark ? "bg-[var(--capsule-spectrum-indigo-soft)]" : "bg-[var(--capsule-glow)]"} absolute left-1/2 top-1/2 h-72 w-[36rem] max-w-[78%] -translate-x-1/2 -translate-y-[38%] rounded-[50%] blur-3xl`} aria-hidden="true" />
       <div className={dark ? "absolute bottom-[15%] h-px w-[78%] bg-[linear-gradient(90deg,transparent,rgba(242,239,234,0.24),transparent)]" : "absolute bottom-[15%] h-px w-[78%] bg-[linear-gradient(90deg,transparent,rgba(23,25,28,0.2),transparent)]"} />
@@ -51,7 +51,7 @@ export default function SpecimenStage({
       {showMarkers && (
         <>
           <div className={`mono-label absolute left-7 top-7 text-[0.58rem] ${markerTone} sm:left-10 sm:top-10`}>Pressure Trace</div>
-          <div className="absolute right-7 top-8 h-2 w-2 rounded-full bg-[var(--capsule-spectrum-indigo-bright)] shadow-[0_0_0_7px_var(--capsule-glow)] sm:right-10 sm:top-11" />
+          <div className="absolute right-7 top-8 h-2 w-2 rounded-full bg-[var(--capsule-red)] shadow-[0_0_0_7px_rgba(152,57,49,0.18)] sm:right-10 sm:top-11" />
           <div className={`mono-label absolute bottom-7 right-7 text-[0.58rem] ${markerTone} sm:bottom-10 sm:right-10`}>Specimen Render</div>
         </>
       )}

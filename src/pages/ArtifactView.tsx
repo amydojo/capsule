@@ -78,10 +78,10 @@ export default function ArtifactView() {
 
   if (isLoading) {
     return (
-      <main className="record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-        <TopBar fossilId={id || "CF-00000"} contextLabel="OBJECT RECORD" />
+      <main className="capsule-mode-archive record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+        <TopBar fossilId={id || "CF-00000"} contextLabel="ARTIFACT RECORD" />
         <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 text-center">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Loading artifact.</p>
+          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Opening artifact record.</p>
         </section>
       </main>
     );
@@ -89,10 +89,10 @@ export default function ArtifactView() {
 
   if (!artifact) {
     return (
-      <main className="record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-        <TopBar fossilId={id || "CF-00000"} contextLabel="OBJECT RECORD" />
+      <main className="capsule-mode-archive record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+        <TopBar fossilId={id || "CF-00000"} contextLabel="ARTIFACT RECORD" />
         <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 text-center">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Artifact not found.</p>
+          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Artifact record not found.</p>
           <h1 className="mt-4 text-4xl font-semibold uppercase tracking-[0.04em]">No preserved object here</h1>
           <Link to={ROUTES.vault} className="primary-button mt-8 inline-flex px-6 py-3 text-sm font-medium">
             Return to Vault
@@ -174,8 +174,8 @@ export default function ArtifactView() {
   };
 
   return (
-    <main className="record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-      <TopBar fossilId={artifact.id} contextLabel="OBJECT RECORD" />
+    <main className="capsule-mode-archive record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+      <TopBar fossilId={artifact.id} contextLabel="ARTIFACT RECORD" />
       <section className="mx-auto w-full max-w-[84rem] px-4 pb-20 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-[55rem] pb-7 pt-2 sm:pb-10">
           <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ export default function ArtifactView() {
         </div>
 
         <details className="mx-auto mt-14 max-w-4xl border-t border-[var(--capsule-line)] pt-8 sm:mt-20 sm:pt-10">
-          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Record v2</summary>
+          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Record</summary>
           <div className="mt-6 space-y-10">
             <section>
               <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Observed by Capsule</p>
@@ -364,7 +364,7 @@ export default function ArtifactView() {
 
         {(artifact.ai || renderLabel) && (
           <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
-            <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Technical Metadata</summary>
+            <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Render Metadata</summary>
             {renderLabel && (
               <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
                 {renderLabel} / {artifact.render?.provider || "local"} / motion {artifact.render?.motionSeed || "unseeded"}

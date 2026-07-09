@@ -55,7 +55,7 @@ export default function Rediscover() {
 
   const handleObservation = async () => {
     if (!isStored) return;
-    const text = window.prompt("Add a precise observation for this resurfaced artifact:");
+    const text = window.prompt("Add a precise archive observation for this resurfaced artifact:");
     if (!text) return;
     const updated = await addObservation(artifact.id, text);
     if (updated) {
@@ -81,8 +81,8 @@ export default function Rediscover() {
         {hasObjectFieldPending(artifact) && <p className="mt-4 text-center mono-label text-[0.62rem] text-[var(--capsule-ash-dim)]">Object field pending.</p>}
 
         <div className="mx-auto mt-9 flex max-w-4xl flex-col items-center gap-2 text-center">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">FOSSIL ID {artifact.id}</p>
-          <p className="text-2xl font-semibold text-[var(--capsule-bone)]">Captured {daysSince(artifact.createdAt)} days ago</p>
+          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">CAPSULE ID {artifact.id}</p>
+          <p className="text-2xl font-semibold text-[var(--capsule-bone)]">Filed {daysSince(artifact.createdAt)} days ago</p>
         </div>
 
         <section className="mx-auto mt-10 grid max-w-4xl gap-5 sm:grid-cols-2">
@@ -95,7 +95,7 @@ export default function Rediscover() {
                 <SpecimenNotebook small />
               )}
             </div>
-            <p className="mt-4 text-sm text-[var(--capsule-ash-dim)]">Captured</p>
+            <p className="mt-4 text-sm text-[var(--capsule-ash-dim)]">Source evidence</p>
             <p className="font-mono text-sm text-[var(--capsule-bone)]">{artifact.capturePoint}</p>
           </div>
           <div className="border-t border-[var(--capsule-line-dark)] pt-5">
@@ -104,7 +104,7 @@ export default function Rediscover() {
               {heroImage ? (
                 <PreservationField mode="vault" imageDataUrl={heroImage} imageAlt={`${artifact.title} specimen`} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
               ) : (
-                <div className="flex min-h-40 items-center justify-center rounded-2xl border border-[rgba(101,112,255,0.24)] bg-white/[0.055]">
+                <div className="flex min-h-40 items-center justify-center rounded-2xl border border-[var(--capsule-line-dark)] bg-white/[0.055]">
                   <SpecimenNotebook small refined />
                 </div>
               )}
@@ -119,7 +119,7 @@ export default function Rediscover() {
             onClick={() => (isStored ? navigate(getArtifactRoute(artifact.id)) : navigate(ROUTES.vault))}
             className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-5 py-3 text-sm font-medium text-[var(--capsule-graphite-black)]"
           >
-            Open Artifact
+            Open Artifact Record
           </button>
           <button onClick={() => void handleObservation()} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Add Observation</button>
           <button onClick={() => void handleRediscover()} disabled={!isStored} className="device-control-button px-5 py-3 text-sm font-medium">Mark Rediscovered</button>

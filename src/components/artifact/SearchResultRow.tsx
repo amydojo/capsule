@@ -18,7 +18,7 @@ const defaultResults: SearchResult[] = [
 
 const joinClasses = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(" ");
 
-export default function SearchResultRow({ eyebrow = "Suggested", results = defaultResults, onSelect, className }: SearchResultRowProps) {
+export default function SearchResultRow({ eyebrow = "Archive match", results = defaultResults, onSelect, className }: SearchResultRowProps) {
   return (
     <section className={joinClasses("capsule-mode-archive rounded-[var(--capsule-radius-panel)] p-5", className)}>
       <p className="mono-label text-[0.56rem] text-[var(--capsule-muted)]">{eyebrow}</p>

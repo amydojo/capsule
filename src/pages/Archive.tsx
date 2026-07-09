@@ -90,13 +90,13 @@ export default function Archive() {
       <section className="mx-auto w-full max-w-[78rem] px-5 sm:px-8 lg:px-10">
         <div className="mb-8 flex flex-col justify-between gap-5 border-b border-[var(--capsule-line-dark)] pb-7 sm:flex-row sm:items-end">
           <div>
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">Preserved artifacts</p>
+            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">Object archive</p>
             <h1 className="mt-2 text-4xl font-semibold uppercase tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">VAULT</h1>
           </div>
           <div className="flex flex-col gap-3 sm:items-end">
             <p className="max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">{objectCountLabel}</p>
             <Link to={ROUTES.capture} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--capsule-bone)] px-6 py-3 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-              Capture Object
+              Preserve Object
             </Link>
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function Archive() {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search artifacts"
+              placeholder="Search artifact records"
               className="rounded-full border border-[var(--capsule-line-dark)] bg-white/[0.055] px-5 py-3 text-sm text-[var(--capsule-bone)] outline-none placeholder:text-[var(--capsule-ash-dim)]"
             />
             <select
@@ -124,10 +124,10 @@ export default function Archive() {
 
         <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
           {[
-            "All",
-            "Artifacts",
+            "All Records",
+            "Objects",
             "Specimens",
-            "Media",
+            "Source Evidence",
           ].map((label, index) => (
             <span key={label} className={`mono-label shrink-0 rounded-full border px-4 py-2 text-[0.56rem] ${index === 0 ? "border-[rgba(154,149,86,0.48)] bg-[rgba(154,149,86,0.12)] text-[var(--capsule-mineral-olive-bright)]" : "border-[var(--capsule-line-dark)] bg-white/[0.04] text-[var(--capsule-ash-dim)]"}`}>
               {label}
@@ -137,17 +137,17 @@ export default function Archive() {
 
         {generatedArtifacts.length === 0 ? (
           <div className="rounded-[1.7rem] border border-[var(--capsule-line-dark)] bg-white/[0.045] p-10 text-center">
-            <p className="text-lg font-semibold text-[var(--capsule-bone)]">No artifacts preserved yet.</p>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">Capture an object to begin the Vault.</p>
+            <p className="text-lg font-semibold text-[var(--capsule-bone)]">The Vault is ready for its first preserved object.</p>
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">Present source evidence to begin the archive.</p>
             <Link to={ROUTES.capture} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--capsule-bone)] px-6 py-3 text-sm font-semibold text-[var(--capsule-graphite-black)]">
-              Capture Object
+              Preserve Object
             </Link>
           </div>
         ) : (
           <div className="space-y-4">
             {featuredArtifact && (
               <Link to={getArtifactRoute(featuredArtifact.id)} className="block rounded-[2rem] border border-[rgba(154,149,86,0.45)] bg-[rgba(154,149,86,0.08)] p-3 shadow-[0_26px_78px_rgba(0,0,0,0.28)]">
-                <p className="mono-label mb-3 px-2 text-[0.58rem] text-[var(--capsule-mineral-olive-bright)]">Featured Artifact</p>
+                <p className="mono-label mb-3 px-2 text-[0.58rem] text-[var(--capsule-mineral-olive-bright)]">Recent Artifact Record</p>
                 <ArtifactRow artifact={featuredArtifact} linked={false} />
                 <div className="mt-4 flex justify-center gap-2">
                   <span className="h-1.5 w-5 rounded-full bg-[var(--capsule-mineral-olive)]" />
@@ -165,7 +165,7 @@ export default function Archive() {
 
         {(generatedArtifacts.length === 0 || filteredArtifacts.length === 0) && (
           <section className="mt-12 border-t border-[var(--capsule-line-dark)] pt-8">
-            <p className="mono-label mb-5 text-[0.68rem] text-[var(--capsule-ash-dim)]">Sample objects</p>
+            <p className="mono-label mb-5 text-[0.68rem] text-[var(--capsule-ash-dim)]">Reference objects</p>
             <div className="space-y-4">
               {sampleArtifacts.slice(0, 3).map((artifact) => (
                 <ArtifactRow key={artifact.id} artifact={artifact} linked={false} />

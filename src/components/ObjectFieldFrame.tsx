@@ -33,18 +33,18 @@ export default function ObjectFieldFrame({ sourceImageDataUrl, boundary, onImage
           aria-hidden="true"
         />
         <motion.div
-          className="absolute overflow-hidden border border-[var(--capsule-spectrum-indigo-bright)] bg-white/[0.035] shadow-[0_0_0_9999px_rgba(0,0,0,0.36),inset_0_0_42px_rgba(101,112,255,0.16),0_0_38px_rgba(101,112,255,0.22)]"
+          className="absolute overflow-hidden border border-[var(--capsule-aura-slate)] bg-white/[0.035] shadow-[0_0_0_9999px_rgba(0,0,0,0.36),inset_0_0_42px_rgba(96,112,123,0.14),0_0_38px_rgba(96,112,123,0.18)]"
           style={selectionStyle}
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
         >
-          <span className="absolute -left-px -top-px h-7 w-7 border-l-2 border-t-2 border-[var(--capsule-spectrum-indigo-bright)]" />
-          <span className="absolute -right-px -top-px h-7 w-7 border-r-2 border-t-2 border-[var(--capsule-spectrum-indigo-bright)]" />
-          <span className="absolute -bottom-px -left-px h-7 w-7 border-b-2 border-l-2 border-[var(--capsule-spectrum-indigo-bright)]" />
-          <span className="absolute -bottom-px -right-px h-7 w-7 border-b-2 border-r-2 border-[var(--capsule-spectrum-indigo-bright)]" />
+          <span className="absolute -left-px -top-px h-7 w-7 border-l-2 border-t-2 border-[var(--capsule-aura-slate)]" />
+          <span className="absolute -right-px -top-px h-7 w-7 border-r-2 border-t-2 border-[var(--capsule-aura-slate)]" />
+          <span className="absolute -bottom-px -left-px h-7 w-7 border-b-2 border-l-2 border-[var(--capsule-aura-slate)]" />
+          <span className="absolute -bottom-px -right-px h-7 w-7 border-b-2 border-r-2 border-[var(--capsule-aura-slate)]" />
           <motion.span
-            className="absolute inset-y-0 w-16 bg-[linear-gradient(90deg,transparent,rgba(101,112,255,0.24),transparent)] blur-[1px]"
+            className="absolute inset-y-0 w-16 bg-[linear-gradient(90deg,transparent,rgba(96,112,123,0.22),transparent)] blur-[1px]"
             initial={{ left: "-24%", opacity: 0 }}
             animate={{ left: ["-24%", "110%"], opacity: [0, 0.8, 0] }}
             transition={{ duration: 5.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.4 }}

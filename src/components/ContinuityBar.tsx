@@ -10,7 +10,7 @@ export default function ContinuityBar({ value, tone = "light" }: ContinuityBarPr
   return (
     <div className="flex items-center gap-2" aria-label={`Continuity ${value} out of 100`}>
       <div className={`h-px flex-1 overflow-hidden rounded-full ${inactiveTone}`}>
-        <div className="h-full rounded-full bg-[var(--capsule-spectrum-indigo-bright)]" style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
+        <div className="h-full rounded-full bg-[var(--capsule-gold)]" style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
       </div>
       <span className={`font-mono text-xs ${textTone}`}>{value}/100</span>
     </div>

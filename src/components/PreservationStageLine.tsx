@@ -4,7 +4,7 @@ type PreservationStageLineProps = {
   activeIndex: number;
 };
 
-const stages = ["Capture", "Isolate", "Analyze", "Trace", "Preserve"];
+const stages = ["Source", "Field", "Facts", "Layer", "Review"];
 
 export default function PreservationStageLine({ activeIndex }: PreservationStageLineProps) {
   return (
@@ -13,8 +13,8 @@ export default function PreservationStageLine({ activeIndex }: PreservationStage
         {stages.map((stage, index) => {
           const active = index === activeIndex;
           const complete = index < activeIndex;
-          const tone = active ? "text-[var(--capsule-spectrum-indigo-bright)]" : complete ? "text-[var(--capsule-mineral-olive-bright)]" : "text-[var(--capsule-ash-dim)]";
-          const lineTone = complete ? "bg-[var(--capsule-mineral-olive)]" : active ? "bg-[var(--capsule-spectrum-indigo-bright)]" : "bg-[var(--capsule-line-dark)]";
+          const tone = active ? "text-[var(--capsule-coral)]" : complete ? "text-[var(--capsule-gold)]" : "text-[var(--capsule-ash-dim)]";
+          const lineTone = complete ? "bg-[var(--capsule-gold)]" : active ? "bg-[var(--capsule-red)]" : "bg-[var(--capsule-line-dark)]";
 
           return (
             <div key={stage} className="relative flex flex-col items-center gap-2">
@@ -22,7 +22,7 @@ export default function PreservationStageLine({ activeIndex }: PreservationStage
                 <div className={`absolute left-1/2 top-1.5 h-px w-full ${lineTone}`} aria-hidden="true" />
               )}
               <motion.span
-                className={`relative z-10 h-3 w-3 rounded-full border border-[rgba(242,239,234,0.68)] ${active ? "bg-[var(--capsule-spectrum-indigo-bright)] shadow-[0_0_0_7px_var(--capsule-spectrum-indigo-soft)]" : complete ? "bg-[var(--capsule-mineral-olive)]" : "bg-[var(--capsule-line-dark)]"}`}
+                className={`relative z-10 h-3 w-3 rounded-full border border-[rgba(242,239,234,0.68)] ${active ? "bg-[var(--capsule-red)] shadow-[0_0_0_7px_rgba(152,57,49,0.18)]" : complete ? "bg-[var(--capsule-gold)]" : "bg-[var(--capsule-line-dark)]"}`}
                 animate={active ? { scale: [1, 1.18, 1] } : { scale: 1 }}
                 transition={{ duration: 1.6, repeat: active ? Infinity : 0, ease: "easeInOut" }}
               />

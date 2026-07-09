@@ -80,7 +80,7 @@ export default function ObjectSelector({ sourceImageDataUrl, onConfirm, onCancel
         createdAt: new Date().toISOString(),
       });
     } catch {
-      setError("Could not lock the object field. Try again or upload a clearer image.");
+      setError("Could not lock the object field. Try again or select clearer source evidence.");
     } finally {
       setIsExtracting(false);
     }
@@ -88,11 +88,11 @@ export default function ObjectSelector({ sourceImageDataUrl, onConfirm, onCancel
 
   return (
     <div className="space-y-5">
-      <CaptureFrame label="ADJUST FIELD" status="OBJECT READY" mode="preview">
+      <CaptureFrame label="OBJECT FIELD" status="FIELD ADJUSTMENT" mode="preview">
         <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-5 py-16 sm:px-10">
           <div className="max-w-xl text-center text-white">
-            <p className="text-xl font-semibold">Adjust the object field.</p>
-            <p className="mt-2 text-sm leading-6 text-white/58">Save the field when the object feels centered.</p>
+            <p className="text-xl font-semibold">Set the field around the object.</p>
+            <p className="mt-2 text-sm leading-6 text-white/58">Save the field when the object is centered in the source evidence.</p>
           </div>
 
           <ObjectFieldFrame sourceImageDataUrl={sourceImageDataUrl} boundary={boundary} onImageLoad={setImageSize} />
@@ -101,7 +101,7 @@ export default function ObjectSelector({ sourceImageDataUrl, onConfirm, onCancel
 
       <div className="grid gap-3 sm:grid-cols-2">
         <button type="button" onClick={() => setShowAdvanced((value) => !value)} className="device-control-button px-7 py-3 text-sm font-medium">
-          Advanced Adjust
+          Field Controls
         </button>
         <button type="button" onClick={() => setShowDetails((value) => !value)} className="device-control-button px-7 py-3 text-sm font-medium">
           Details
@@ -112,15 +112,15 @@ export default function ObjectSelector({ sourceImageDataUrl, onConfirm, onCancel
         <div className="grid gap-3 rounded-[1.35rem] border border-[var(--capsule-line-dark)] bg-white/[0.055] p-4 sm:grid-cols-4">
           <label className="block sm:col-span-2">
             <span className="mono-label text-[0.6rem] text-[var(--capsule-ash-dim)]">Zoom</span>
-            <input type="range" min="1" max="3" step="0.01" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} className="mt-3 w-full accent-[var(--capsule-spectrum-indigo-bright)]" />
+            <input type="range" min="1" max="3" step="0.01" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} className="mt-3 w-full accent-[var(--capsule-red)]" />
           </label>
           <label className="block">
             <span className="mono-label text-[0.6rem] text-[var(--capsule-ash-dim)]">Horizontal</span>
-            <input type="range" min="-100" max="100" step="1" value={offsetX} onChange={(event) => setOffsetX(Number(event.target.value))} className="mt-3 w-full accent-[var(--capsule-spectrum-indigo-bright)]" />
+            <input type="range" min="-100" max="100" step="1" value={offsetX} onChange={(event) => setOffsetX(Number(event.target.value))} className="mt-3 w-full accent-[var(--capsule-red)]" />
           </label>
           <label className="block">
             <span className="mono-label text-[0.6rem] text-[var(--capsule-ash-dim)]">Vertical</span>
-            <input type="range" min="-100" max="100" step="1" value={offsetY} onChange={(event) => setOffsetY(Number(event.target.value))} className="mt-3 w-full accent-[var(--capsule-spectrum-indigo-bright)]" />
+            <input type="range" min="-100" max="100" step="1" value={offsetY} onChange={(event) => setOffsetY(Number(event.target.value))} className="mt-3 w-full accent-[var(--capsule-red)]" />
           </label>
           <button type="button" onClick={resetAlignment} className="device-control-button px-7 py-3.5 text-sm font-medium sm:col-span-4">Reset Field</button>
         </div>
@@ -137,7 +137,7 @@ export default function ObjectSelector({ sourceImageDataUrl, onConfirm, onCancel
 
       <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_auto]">
         <button type="button" disabled={isExtracting} onClick={() => void confirmSelection()} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)] disabled:opacity-50">
-          {isExtracting ? "Saving Field..." : "Save Field"}
+          {isExtracting ? "Sealing Field..." : "Save Object Field"}
         </button>
         {onCancel && <button type="button" onClick={onCancel} className="device-control-button px-7 py-3.5 text-sm font-medium">Cancel</button>}
         {onRetake && <button type="button" onClick={onRetake} className="device-control-button px-7 py-3.5 text-sm font-medium">Retake</button>}

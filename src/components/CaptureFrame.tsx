@@ -19,7 +19,7 @@ export default function CaptureFrame({
     <div
       className={`relative isolate overflow-hidden rounded-[2rem] border border-[var(--capsule-line-dark)] bg-[var(--capsule-panel-black)] shadow-[inset_0_1px_0_rgba(242,239,234,0.16),inset_0_-28px_70px_rgba(0,0,0,0.42),0_28px_80px_rgba(0,0,0,0.28)] ${className}`}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_48%,rgba(101,112,255,0.18),transparent_42%),linear-gradient(180deg,rgba(242,239,234,0.08),rgba(242,239,234,0.015))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_48%,rgba(96,112,123,0.16),transparent_42%),linear-gradient(180deg,rgba(242,239,234,0.08),rgba(242,239,234,0.015))]" />
       {mode !== "live" && (
         <div className="contour-field absolute left-1/2 top-1/2 h-[66%] w-[86%] -translate-x-1/2 -translate-y-1/2 opacity-35" />
       )}
@@ -29,7 +29,7 @@ export default function CaptureFrame({
       <div className="absolute bottom-5 left-5 h-8 w-8 border-b border-l border-white/40" />
       <div className="absolute bottom-5 right-5 h-8 w-8 border-b border-r border-white/40" />
       <div className="pointer-events-none absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/14 bg-black/24 px-3 py-1.5 backdrop-blur">
-        {mode === "live" && <span className="h-1.5 w-1.5 rounded-full bg-[var(--capsule-spectrum-indigo-bright)] shadow-[0_0_0_5px_var(--capsule-spectrum-indigo-soft)]" />}
+        {mode === "live" && <span className="h-1.5 w-1.5 rounded-full bg-[var(--capsule-red)] shadow-[0_0_0_5px_rgba(152,57,49,0.18)]" />}
         <span className="mono-label text-[0.56rem] text-white/86">{label}</span>
       </div>
       <div className="pointer-events-none absolute right-5 top-5 z-20 rounded-full border border-white/14 bg-black/24 px-3 py-1.5 backdrop-blur">

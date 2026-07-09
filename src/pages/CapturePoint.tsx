@@ -129,7 +129,7 @@ export default function CapturePoint() {
       const dataUrl = await fileToDataUrl(file);
       await lockDefaultField(dataUrl);
     } catch {
-      setError("Capsule could not prepare this object. Try again or use a clearer image.");
+      setError("Capsule could not prepare this source evidence. Try again or use a clearer image.");
       setStep("error");
     } finally {
       setIsProcessingImage(false);
@@ -142,7 +142,7 @@ export default function CapturePoint() {
       setIsProcessingImage(true);
       await lockDefaultField(dataUrl);
     } catch {
-      setError("Capsule could not prepare this object. Try again or upload a clearer image.");
+      setError("Capsule could not prepare this source evidence. Try again or select a clearer image.");
       setStep("error");
     } finally {
       setIsProcessingImage(false);
@@ -192,7 +192,7 @@ export default function CapturePoint() {
     setError("");
 
     if (!sourceImageDataUrl || !extractionResult) {
-      setError("Capture an object before preserving.");
+      setError("Present source evidence before preserving.");
       setStep("error");
       return;
     }
@@ -204,7 +204,7 @@ export default function CapturePoint() {
     setError("");
 
     if (!sourceImageDataUrl || !extractionResult) {
-      setError("Capture an object before preserving.");
+      setError("Present source evidence before preserving.");
       setStep("error");
       return;
     }
@@ -239,13 +239,13 @@ export default function CapturePoint() {
   };
 
   return (
-    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-36 md:pb-12">
+    <main className="capsule-mode-preservation instrument-shell min-h-[100dvh] overflow-x-hidden pb-36 md:pb-12">
       <TopBar fossilId={primaryArtifact.id} tone="dark" />
       <section className="mx-auto w-full max-w-[78rem] px-5 sm:px-8 lg:px-10">
         <div className="mb-6 hidden flex-col justify-between gap-4 md:flex md:flex-row md:items-end">
           <div>
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">CAPTURE POINT</p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-[0.01em] text-[var(--capsule-bone)] sm:text-5xl">Prepare object for preservation.</h1>
+            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">SOURCE EVIDENCE</p>
+            <h1 className="mt-2 text-4xl font-semibold tracking-[0.01em] text-[var(--capsule-bone)] sm:text-5xl">Present an object to preserve.</h1>
           </div>
           {showModeToggle && (
             <CaptureModeToggle
@@ -258,13 +258,13 @@ export default function CapturePoint() {
         {step === "camera" && <CameraCapture onCapture={(dataUrl) => void handleCameraCapture(dataUrl)} onUploadInstead={goToUpload} />}
 
         {step === "error" && (
-          <CaptureFrame label="CAPTURE POINT" status="INTAKE INTERRUPTED" mode="empty">
+          <CaptureFrame label="SOURCE EVIDENCE" status="INTAKE INTERRUPTED" mode="empty">
             <div className="mx-auto max-w-sm px-6 text-center text-white">
-              <p className="text-lg font-semibold">Object capture is unavailable.</p>
-              <p className="mt-3 text-sm leading-6 text-white/58">{error || "Capture or upload an object first."}</p>
+              <p className="text-lg font-semibold">Source evidence is unavailable.</p>
+              <p className="mt-3 text-sm leading-6 text-white/58">{error || "Present source evidence before preserving."}</p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <button type="button" onClick={() => setStep("camera")} className="primary-button px-5 py-3 text-sm font-medium">Try Again</button>
-                <button type="button" onClick={goToUpload} className="secondary-button px-5 py-3 text-sm font-medium">Upload Instead</button>
+                <button type="button" onClick={goToUpload} className="secondary-button px-5 py-3 text-sm font-medium">Select Source Image</button>
               </div>
             </div>
           </CaptureFrame>
@@ -278,11 +278,11 @@ export default function CapturePoint() {
             onDrop={handleDrop}
             className="block w-full text-left"
           >
-            <CaptureFrame label="UPLOAD INTAKE" status={isProcessingImage ? "PREPARING OBJECT" : "OBJECT FIELD"} mode="empty">
+            <CaptureFrame label="SOURCE EVIDENCE" status={isProcessingImage ? "PREPARING FIELD" : "OBJECT FIELD"} mode="empty">
               <div className="mx-auto max-w-sm px-6 text-center text-white">
-                <p className="text-lg font-semibold">Choose Image</p>
-                <p className="mt-3 text-sm leading-6 text-white/58">Place an existing object capture into the chamber.</p>
-                <div className="mt-6 inline-flex rounded-full border border-white/14 bg-white/10 px-5 py-3 text-sm font-medium">Upload Instead</div>
+                <p className="text-lg font-semibold">Select source image</p>
+                <p className="mt-3 text-sm leading-6 text-white/58">Capsule begins with an image, but the image is only the source. The object becomes the record.</p>
+                <div className="mt-6 inline-flex rounded-full border border-white/14 bg-white/10 px-5 py-3 text-sm font-medium">Select source image</div>
               </div>
             </CaptureFrame>
           </button>
@@ -290,24 +290,24 @@ export default function CapturePoint() {
 
         {step === "object-ready" && extractionResult && (
           <div className="space-y-5">
-            <CaptureFrame label="OBJECT READY" status="OBJECT FIELD" mode="preview">
+            <CaptureFrame label="OBJECT FIELD" status="FIELD READY" mode="preview">
               <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-6 py-14 text-center text-white sm:px-10">
                 <div>
-                  <p className="text-xl font-semibold">Capsule selected the object field.</p>
-                  <p className="mt-2 text-sm leading-6 text-white/58">Preserve now, or adjust the field first.</p>
+                  <p className="text-xl font-semibold">Set the field around the object.</p>
+                  <p className="mt-2 text-sm leading-6 text-white/58">Adjust what Capsule should preserve from the source evidence.</p>
                 </div>
                 <div className="relative flex max-h-[48dvh] w-full items-center justify-center">
                   <div className="absolute inset-x-[22%] bottom-2 h-10 rounded-[50%] bg-black/35 blur-3xl" />
-                  <img src={specimenImageDataUrl} alt="Object ready for preservation" className="relative max-h-[48dvh] max-w-full rounded-xl object-contain shadow-[0_34px_74px_rgba(0,0,0,0.34)]" />
+                  <img src={specimenImageDataUrl} alt="Object field ready for preservation" className="relative max-h-[48dvh] max-w-full rounded-xl object-contain shadow-[0_34px_74px_rgba(0,0,0,0.34)]" />
                 </div>
               </div>
             </CaptureFrame>
             <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
               <button type="button" onClick={openContextLock} className="hidden min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)] md:inline-flex md:items-center md:justify-center">
-                Preserve Object
+                Continue to Context Lock
               </button>
               <button type="button" onClick={() => setStep("adjust-field")} className="device-control-button px-7 py-3.5 text-sm font-medium">Adjust Field</button>
-              <button type="button" onClick={retakePhoto} className="device-control-button px-7 py-3.5 text-sm font-medium">Retake</button>
+              <button type="button" onClick={retakePhoto} className="device-control-button px-7 py-3.5 text-sm font-medium">New Source Evidence</button>
             </div>
           </div>
         )}
@@ -374,7 +374,7 @@ export default function CapturePoint() {
 
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
-        {showFixedPreserve && <MobileCaptureCTA type="button" label="Preserve Object" onClick={openContextLock} />}
+        {showFixedPreserve && <MobileCaptureCTA type="button" label="Continue to Context Lock" onClick={openContextLock} />}
 
         <div className={`mx-auto max-w-[78rem] ${showFixedPreserve || step === "submitting" || step === "adjust-field" || step === "context-lock" ? "hidden md:block" : ""}`}>
           <BottomNav tone="dark" />

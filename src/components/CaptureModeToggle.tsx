@@ -11,14 +11,14 @@ export default function CaptureModeToggle({ mode, onModeChange }: CaptureModeTog
         onClick={() => onModeChange("camera")}
         className={`min-h-11 rounded-full px-4 py-2 text-sm font-medium ${mode === "camera" ? "bg-[var(--capsule-graphite)] text-white" : "text-[var(--capsule-ash)]"}`}
       >
-        Use Camera
+        Camera
       </button>
       <button
         type="button"
         onClick={() => onModeChange("upload")}
         className={`min-h-11 rounded-full px-4 py-2 text-sm font-medium ${mode === "upload" ? "bg-[var(--capsule-graphite)] text-white" : "text-[var(--capsule-ash)]"}`}
       >
-        Upload Instead
+        Source Image
       </button>
     </div>
   );

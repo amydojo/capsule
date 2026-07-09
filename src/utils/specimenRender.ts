@@ -67,7 +67,7 @@ const drawPreservationField = (context: CanvasRenderingContext2D, seed: string, 
   context.fillRect(0, 0, width, height);
 
   const glow = context.createRadialGradient(centerX, centerY, 40, centerX, centerY, width * 0.5);
-  glow.addColorStop(0, dark ? `rgba(101,112,255,${params.glowIntensity})` : `rgba(101,112,255,${params.glowIntensity * 0.42})`);
+  glow.addColorStop(0, dark ? `rgba(96,112,123,${params.glowIntensity})` : `rgba(96,112,123,${params.glowIntensity * 0.42})`);
   glow.addColorStop(0.52, dark ? "rgba(154,149,86,0.1)" : "rgba(255,255,255,0.78)");
   glow.addColorStop(1, "rgba(255,255,255,0)");
   context.fillStyle = glow;
@@ -82,7 +82,7 @@ const drawPreservationField = (context: CanvasRenderingContext2D, seed: string, 
     context.ellipse(0, 0, radius * 1.35, radius * 0.64, 0, 0, Math.PI * 2);
     context.strokeStyle = dark
       ? `rgba(242,239,234,${Math.max(0.04, params.opacity - index * 0.032)})`
-      : `rgba(47,52,146,${Math.max(0.035, params.opacity * 0.38 - index * 0.018)})`;
+      : `rgba(67,81,90,${Math.max(0.035, params.opacity * 0.38 - index * 0.018)})`;
     context.lineWidth = index === 0 ? 1.4 : 1;
     context.stroke();
   }
