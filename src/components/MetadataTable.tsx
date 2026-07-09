@@ -23,12 +23,12 @@ export default function MetadataTable({ artifact, preservationState = artifact.p
   const rows: Array<[string, string]> = [
     ["Classification", record.interpretiveLayer.artifactClass],
     ["Object Label", record.observedFacts.objectLabel],
-    ...(record.identity.userGivenName ? ([["User Given Name", record.identity.userGivenName]] as Array<[string, string]>) : []),
+    ...(record.identity.userGivenName ? ([["Object Name", record.identity.userGivenName]] as Array<[string, string]>) : []),
     ["Material", materialTags],
     ["Origin", record.source.origin || "not recorded"],
     ...(record.identity.collection ? ([["Collection", record.identity.collection]] as Array<[string, string]>) : []),
-    ...(record.source.userNote ? ([["Context Note", record.source.userNote]] as Array<[string, string]>) : []),
-    ["Capture Point", artifact.capturePoint],
+    ...(record.source.userNote ? ([["Why Keep It", record.source.userNote]] as Array<[string, string]>) : []),
+    ["Source Evidence Date", artifact.capturePoint],
     ["Condition", artifact.condition],
   ];
 
@@ -53,7 +53,7 @@ export default function MetadataTable({ artifact, preservationState = artifact.p
       </div>
       {extractionLabel && (
         <div className="grid gap-3 border-b border-[var(--capsule-line)] py-5 sm:grid-cols-[13rem_1fr]">
-          <dt className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Extraction</dt>
+          <dt className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Object Field</dt>
           <dd className="text-[0.95rem] text-[var(--capsule-graphite)]">{extractionLabel}</dd>
         </div>
       )}

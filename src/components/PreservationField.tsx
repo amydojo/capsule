@@ -41,8 +41,8 @@ export default function PreservationField({
   const renderedAsset = render?.method === "local-preserved-render" || render?.method === "openai-pristine-render";
 
   const traceBackground = dark
-    ? `repeating-radial-gradient(ellipse at 50% 52%, rgba(101,112,255,0.2) 0 1px, transparent 1px ${params.lineSpacing}px), radial-gradient(ellipse at 50% 52%, rgba(101,112,255,${params.glowIntensity}), transparent 64%)`
-    : `repeating-radial-gradient(ellipse at 50% 52%, rgba(47,52,146,0.13) 0 1px, transparent 1px ${params.lineSpacing}px), radial-gradient(ellipse at 50% 52%, rgba(101,112,255,${params.glowIntensity * 0.38}), transparent 64%)`;
+    ? `repeating-radial-gradient(ellipse at 50% 52%, rgba(96,112,123,0.18) 0 1px, transparent 1px ${params.lineSpacing}px), radial-gradient(ellipse at 50% 52%, rgba(96,112,123,${params.glowIntensity}), transparent 64%)`
+    : `repeating-radial-gradient(ellipse at 50% 52%, rgba(67,81,90,0.13) 0 1px, transparent 1px ${params.lineSpacing}px), radial-gradient(ellipse at 50% 52%, rgba(96,112,123,${params.glowIntensity * 0.38}), transparent 64%)`;
 
   const traceAnimation = reducedMotion
     ? {}
@@ -76,8 +76,8 @@ export default function PreservationField({
       <div
         className={
           dark
-            ? "absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,rgba(242,239,234,0.1),transparent_18rem),radial-gradient(ellipse_at_50%_56%,rgba(101,112,255,0.12),transparent_25rem),radial-gradient(ellipse_at_50%_82%,rgba(0,0,0,0.76),transparent_34rem)]"
-            : "absolute inset-0 bg-[radial-gradient(circle_at_50%_34%,rgba(255,255,255,0.98),transparent_24rem),radial-gradient(ellipse_at_50%_57%,rgba(101,112,255,0.07),transparent_21rem),radial-gradient(ellipse_at_50%_78%,rgba(23,25,28,0.055),transparent_34rem)]"
+            ? "absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,rgba(242,239,234,0.1),transparent_18rem),radial-gradient(ellipse_at_50%_56%,rgba(96,112,123,0.12),transparent_25rem),radial-gradient(ellipse_at_50%_82%,rgba(0,0,0,0.76),transparent_34rem)]"
+            : "absolute inset-0 bg-[radial-gradient(circle_at_50%_34%,rgba(255,255,255,0.98),transparent_24rem),radial-gradient(ellipse_at_50%_57%,rgba(96,112,123,0.07),transparent_21rem),radial-gradient(ellipse_at_50%_78%,rgba(23,25,28,0.055),transparent_34rem)]"
         }
         aria-hidden="true"
       />

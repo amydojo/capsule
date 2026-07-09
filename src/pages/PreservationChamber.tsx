@@ -19,12 +19,12 @@ import { getArtifactHeroImage } from "../utils/artifactImage";
 const preservationStages: PreservationStage[] = ["captured", "isolated", "analyzed", "traced", "preserved"];
 
 const statusText: Record<PreservationStage, string> = {
-  captured: "Source field stabilized.",
-  isolated: "Object boundary locked.",
-  analyzed: "Reading selected specimen evidence.",
-  traced: "Pressure trace forming.",
-  preserved: "Continuity profile complete.",
-  sealed: "Artifact sealed.",
+  captured: "Source received.",
+  isolated: "Object field sealed.",
+  analyzed: "Observed facts forming.",
+  traced: "Interpretive layer restrained.",
+  preserved: "Record ready for review.",
+  sealed: "Artifact record filed.",
 };
 
 export default function PreservationChamber() {
@@ -58,16 +58,16 @@ export default function PreservationChamber() {
 
   const chamberTitle = useMemo(() => {
     if (session.status === "error") return "Preservation Interrupted";
-    if (isComplete) return "Artifact Created";
-    if (isPreserving) return "Preserving Object";
-    return "Preserving Object";
+    if (isComplete) return "Record Ready for Review";
+    if (isPreserving) return "Preservation Chamber";
+    return "Preservation Chamber";
   }, [isComplete, isPreserving, session.status]);
 
   const stateCopy = useMemo(() => {
-    if (session.status === "error") return "Could not complete artifact generation.";
-    if (isComplete) return "Object preserved.";
+    if (session.status === "error") return "Could not complete the artifact record.";
+    if (isComplete) return "Record ready for Artifact Review.";
     if (isPreserving) return statusText[session.activeStage];
-    if (activeInput) return "Object intake received. Preservation starting.";
+    if (activeInput) return "Source evidence received. Preservation starting.";
     return "No active preservation.";
   }, [activeInput, isComplete, isPreserving, session.activeStage, session.status]);
 
@@ -100,7 +100,7 @@ export default function PreservationChamber() {
         stageTimers.forEach((timer) => window.clearTimeout(timer));
         stageTimersRef.current = [];
         runRef.current = null;
-        failPreservation(error instanceof Error ? error.message : "Preservation could not complete. A local artifact can still be generated.");
+        failPreservation(error instanceof Error ? error.message : "Preservation could not complete. A local artifact record can still be formed.");
       }
     },
     [beginPreservation, completePreservation, failPreservation, setStageProgress],
@@ -146,18 +146,18 @@ export default function PreservationChamber() {
 
   if (!hasCapture) {
     return (
-      <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-        <TopBar fossilId={primaryArtifact.id} tone="dark" contextLabel="PRESERVING OBJECT" />
+      <main className="capsule-mode-preservation instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+        <TopBar fossilId={primaryArtifact.id} tone="dark" contextLabel="PRESERVATION CHAMBER" />
         <section className="mx-auto flex min-h-[70dvh] w-full max-w-3xl flex-col items-center justify-center px-5 text-center sm:px-8">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">PRESERVING OBJECT</p>
+          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">PRESERVATION CHAMBER</p>
           <h1 className="mt-4 text-3xl font-semibold uppercase tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">No active preservation.</h1>
-          <p className="mt-4 max-w-md text-sm leading-6 text-[var(--capsule-ash-dim)]">Capture an object to begin preservation, or return to the Vault.</p>
+          <p className="mt-4 max-w-md text-sm leading-6 text-[var(--capsule-ash-dim)]">Present source evidence to begin preservation, or return to the Vault.</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button onClick={() => navigate(ROUTES.vault)} className="device-control-button px-7 py-3.5 text-sm font-medium">
               Go to Vault
             </button>
             <button onClick={() => navigate(ROUTES.capture)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-              Capture Object
+              Preserve Object
             </button>
           </div>
         </section>
@@ -166,8 +166,8 @@ export default function PreservationChamber() {
   }
 
   return (
-    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-      <TopBar fossilId={session.artifact?.id || primaryArtifact.id} tone="dark" contextLabel="PRESERVING OBJECT" />
+    <main className="capsule-mode-preservation instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
+      <TopBar fossilId={session.artifact?.id || primaryArtifact.id} tone="dark" contextLabel="PRESERVATION CHAMBER" />
       <section className="mx-auto grid w-full max-w-[92rem] gap-5 px-4 pb-10 pt-1 sm:px-8 lg:grid-cols-[14rem_minmax(0,1fr)_15rem] lg:px-10">
         <motion.aside
           initial={{ opacity: 0, y: 16 }}
@@ -192,12 +192,12 @@ export default function PreservationChamber() {
         >
           <div className="mb-7 flex items-end justify-between gap-4 px-1">
             <div>
-              <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">{isComplete ? "SPECIMEN ISOLATION" : "REALITY EXTRACTION"}</p>
+              <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">{isComplete ? "ARTIFACT REVIEW READY" : "PRESERVATION CHAMBER"}</p>
               <h1 className="mt-2 text-3xl font-semibold uppercase leading-none tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">{chamberTitle}</h1>
-              <p className="mt-3 max-w-md text-sm leading-6 text-[var(--capsule-ash-dim)]">Object extracted from reality. Containment field active.</p>
+              <p className="mt-3 max-w-md text-sm leading-6 text-[var(--capsule-ash-dim)]">Capsule is forming the artifact record from the selected object field.</p>
             </div>
             <span className="hidden rounded-full border border-[var(--capsule-line-dark)] bg-white/[0.055] px-3 py-1.5 font-mono text-[0.68rem] text-[var(--capsule-ash-dim)] sm:inline">
-              {isComplete ? "Specimen Render" : isPreserving ? session.activeStage : "intake"}
+              {isComplete ? "review ready" : isPreserving ? statusText[session.activeStage] : "source received"}
             </span>
           </div>
           {isComplete && session.artifact ? (
@@ -231,11 +231,11 @@ export default function PreservationChamber() {
             </div>
           )}
           <div className="sticky bottom-0 z-30 -mx-4 mt-7 flex flex-wrap items-center justify-center gap-3 border-t border-[var(--capsule-line-dark)] bg-[rgba(13,14,16,0.88)] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
-            {activeInput && session.status === "intake" && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preparing Object...</button>}
-            {isPreserving && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preserving Object...</button>}
+            {activeInput && session.status === "intake" && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preparing chamber...</button>}
+            {isPreserving && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Forming record...</button>}
             {isComplete && session.artifact && (
               <button onClick={() => navigate(ROUTES.review)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-                Review Artifact
+                Review Artifact Record
               </button>
             )}
             {session.status === "error" && activeInput && (
@@ -244,7 +244,7 @@ export default function PreservationChamber() {
                   Retry Preservation
                 </button>
                 <button onClick={() => navigate(ROUTES.capture)} className="device-control-button px-7 py-3.5 text-sm font-medium">
-                  Return to Capture
+                  Return to Preserve
                 </button>
               </>
             )}
@@ -267,24 +267,24 @@ export default function PreservationChamber() {
               <span className="h-2 w-2 rounded-full bg-[var(--capsule-mineral-olive)] shadow-[0_0_0_6px_var(--capsule-mineral-olive-soft)]" />
               <p className="mono-label text-[0.6rem] text-[var(--capsule-ash-dim)]">Preservation State</p>
             </div>
-            <h2 className="mt-5 text-xl font-semibold text-[var(--capsule-bone)]">{session.status === "error" ? "Interrupted" : isComplete ? "Object Preserved" : isPreserving ? "Preserving Object" : "Ready"}</h2>
+            <h2 className="mt-5 text-xl font-semibold text-[var(--capsule-bone)]">{session.status === "error" ? "Interrupted" : isComplete ? "Record Ready" : isPreserving ? "Forming Record" : "Ready"}</h2>
             <p className="mt-2 text-xs leading-5 text-[var(--capsule-ash-dim)]">{session.error || stateCopy}</p>
             <div className="mt-8 flex items-end justify-between border-t border-[var(--capsule-line-dark)] pt-5">
-              <span className="mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">Signal Strength</span>
+              <span className="mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">Record Formation</span>
               <span className="font-mono text-2xl text-[var(--capsule-bone)]">{Math.round(session.progress || 0)}%</span>
             </div>
           </div>
           <div className="instrument-card-dark mt-4 rounded-2xl p-5">
             {preservationStages.map((stage, index) => (
               <div key={stage} className="flex items-center gap-3 border-b border-[var(--capsule-line-dark)] py-3 last:border-0">
-                <span className="font-mono text-xs text-[var(--capsule-spectrum-indigo-bright)]">0{index + 1}</span>
-                <span className="text-xs text-[var(--capsule-ash-dim)]">{stage === "preserved" ? "Preserve" : stage.charAt(0).toUpperCase() + stage.slice(1)}</span>
+                <span className="font-mono text-xs text-[var(--capsule-coral)]">0{index + 1}</span>
+                <span className="text-xs text-[var(--capsule-ash-dim)]">{statusText[stage]}</span>
               </div>
             ))}
           </div>
           {hasCapture && session.status !== "preserving" && (
             <button onClick={resetSession} className="device-control-button mt-4 w-full px-5 py-3 text-sm font-medium">
-              New Capture
+              New Source Evidence
             </button>
           )}
         </motion.aside>

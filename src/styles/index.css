@@ -19,7 +19,7 @@ body {
   min-height: 100vh;
   background:
     radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 1), transparent 42rem),
-    radial-gradient(circle at 50% 46%, rgba(101, 112, 255, 0.04), transparent 34rem),
+    radial-gradient(circle at 50% 46%, rgba(96, 112, 123, 0.04), transparent 34rem),
     linear-gradient(180deg, var(--capsule-bone-soft) 0%, var(--capsule-bone) 66%, #e8e4da 100%);
   color: var(--capsule-graphite);
   font-family: var(--font-sans);
@@ -45,7 +45,7 @@ a {
 .instrument-shell {
   background:
     radial-gradient(circle at 50% 4%, rgba(242, 239, 234, 0.08), transparent 18rem),
-    radial-gradient(circle at 50% 44%, rgba(101, 112, 255, 0.1), transparent 22rem),
+    radial-gradient(circle at 50% 44%, rgba(96, 112, 123, 0.1), transparent 22rem),
     linear-gradient(180deg, #14151a 0%, var(--capsule-abyss-black) 42%, #08090b 100%);
   color: var(--capsule-bone);
 }
@@ -141,22 +141,22 @@ a {
 
 .contour-field {
   background:
-    repeating-radial-gradient(ellipse at 50% 52%, rgba(101, 112, 255, 0.17) 0 1px, transparent 1px 20px),
+    repeating-radial-gradient(ellipse at 50% 52%, rgba(96, 112, 123, 0.17) 0 1px, transparent 1px 20px),
     repeating-radial-gradient(ellipse at 48% 47%, rgba(23, 25, 28, 0.055) 0 1px, transparent 1px 31px),
-    radial-gradient(ellipse at center, rgba(101, 112, 255, 0.13), transparent 63%);
+    radial-gradient(ellipse at center, rgba(96, 112, 123, 0.13), transparent 63%);
   mask-image: radial-gradient(ellipse at center, black 0%, black 56%, transparent 80%);
 }
 
 .pressure-ghost {
   background:
     radial-gradient(ellipse at 50% 50%, rgba(23, 25, 28, 0.11), transparent 55%),
-    radial-gradient(ellipse at 50% 52%, rgba(101, 112, 255, 0.11), transparent 62%),
-    linear-gradient(90deg, transparent, rgba(101, 112, 255, 0.09), transparent);
+    radial-gradient(ellipse at 50% 52%, rgba(96, 112, 123, 0.11), transparent 62%),
+    linear-gradient(90deg, transparent, rgba(96, 112, 123, 0.09), transparent);
   filter: blur(16px);
 }
 
 .scan-sheen {
-  background: linear-gradient(90deg, transparent 0%, rgba(101, 112, 255, 0.055) 35%, rgba(255, 255, 255, 0.86) 48%, rgba(101, 112, 255, 0.22) 50%, rgba(255, 255, 255, 0.86) 52%, rgba(101, 112, 255, 0.055) 65%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(96, 112, 123, 0.055) 35%, rgba(255, 255, 255, 0.86) 48%, rgba(96, 112, 123, 0.2) 50%, rgba(255, 255, 255, 0.86) 52%, rgba(96, 112, 123, 0.055) 65%, transparent 100%);
 }
 
 .chamber-shadow {
@@ -189,7 +189,7 @@ a {
 
 .notebook-cover {
   background:
-    linear-gradient(105deg, transparent 0%, rgba(101, 112, 255, 0.1) 44%, rgba(255, 255, 255, 0.5) 49%, transparent 58%),
+    linear-gradient(105deg, transparent 0%, rgba(96, 112, 123, 0.1) 44%, rgba(255, 255, 255, 0.5) 49%, transparent 58%),
     radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.7), transparent 28%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.48), transparent 32%),
     linear-gradient(180deg, #f7efe2 0%, #ebe0d0 100%);

@@ -11,7 +11,7 @@ export const ARTIFACT_ROUTE_PREFIX = "/artifact/";
 
 export const PRIMARY_NAV_ITEMS = [
   { label: "Vault", route: ROUTES.vault },
-  { label: "Capture", route: ROUTES.capture },
+  { label: "Preserve", route: ROUTES.capture },
   { label: "Rediscover", route: ROUTES.rediscover },
 ] as const;
 

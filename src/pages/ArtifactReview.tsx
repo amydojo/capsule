@@ -183,7 +183,7 @@ export default function ArtifactReview() {
       resetSession();
       navigate(getArtifactRoute(savedArtifact.id));
     } catch {
-      setError("Capsule could not save this review. Try again before leaving this screen.");
+      setError("Capsule could not file this review. Try again before leaving this screen.");
       setIsSaving(false);
     }
   };
@@ -196,7 +196,7 @@ export default function ArtifactReview() {
           <p className="mono-label text-[0.68rem] text-[var(--capsule-muted)]">ARTIFACT REVIEW</p>
           <h1 className="mt-4 text-3xl font-semibold tracking-[0.01em] text-[var(--capsule-black)] sm:text-5xl">No artifact is waiting for review.</h1>
           <button type="button" onClick={() => navigate(ROUTES.capture)} className="primary-button mt-8 inline-flex px-6 py-3 text-sm font-medium">
-            Return to Capture
+            Return to Preserve
           </button>
         </section>
         <BottomNav />
@@ -316,11 +316,11 @@ export default function ArtifactReview() {
           <aside className="lg:sticky lg:top-6 lg:self-start">
             <div className="capsule-surface-paper p-5">
               <p className="mono-label text-[0.58rem] text-[var(--capsule-red)]">SAVE ACTIONS</p>
-              <p className="mt-4 text-sm leading-6 text-[var(--capsule-muted)]">Saving writes this corrected record to the Vault.</p>
+              <p className="mt-4 text-sm leading-6 text-[var(--capsule-muted)]">Saving files this corrected artifact record in the Vault.</p>
               {error && <p className="mt-4 text-sm leading-6 text-[var(--capsule-red)]">{error}</p>}
               <div className="mt-6 grid gap-3">
                 <button type="button" disabled={isSaving} onClick={() => void saveReview()} className="primary-button min-h-11 px-5 py-3 text-sm font-medium disabled:opacity-55">
-                  {isSaving ? "Saving..." : "Save to Vault"}
+                  {isSaving ? "Filing Record..." : "Save to Vault"}
                 </button>
                 <button type="button" disabled={isSaving} onClick={discardReview} className="secondary-button min-h-11 px-5 py-3 text-sm font-medium disabled:opacity-55">
                   Discard Review

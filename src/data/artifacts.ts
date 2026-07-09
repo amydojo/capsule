@@ -6,15 +6,15 @@ const timeline = (id: string, title: string): Artifact["timeline"] => [
   {
     id: `${id}-created`,
     stage: "created",
-    label: "Artifact generated",
-    description: `${title} entered Capsule as a sample artifact.`,
+    label: "Artifact record formed",
+    description: `${title} entered Capsule as a sample preserved object.`,
     date: now,
   },
   {
     id: `${id}-preserved`,
     stage: "preserved",
-    label: "Object Preserved",
-    description: "Preservation transition completed specimen rendering.",
+    label: "Object preserved",
+    description: "Preservation chamber completed specimen rendering.",
     date: now,
   },
 ];

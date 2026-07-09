@@ -15,8 +15,8 @@ export default function SpecimenPreview({ extraction, onContinue, onReselect }: 
       <CaptureFrame label="SPECIMEN LOCKED" status="SOURCE RETAINED" mode="preview">
         <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-6 py-16 text-center text-white sm:px-10">
           <div>
-            <p className="text-xl font-semibold">Object ready for preservation.</p>
-            <p className="mt-2 text-sm leading-6 text-white/58">Source Capture retained as provenance.</p>
+            <p className="text-xl font-semibold">Object field ready for preservation.</p>
+            <p className="mt-2 text-sm leading-6 text-white/58">Source evidence retained as provenance.</p>
           </div>
           <motion.div
             initial={{ opacity: 0, y: 12, scale: 0.97 }}
@@ -33,7 +33,7 @@ export default function SpecimenPreview({ extraction, onContinue, onReselect }: 
         </div>
       </CaptureFrame>
       <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-        <button type="button" onClick={onContinue} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Continue to Meaning</button>
+        <button type="button" onClick={onContinue} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Continue to Context Lock</button>
         {onReselect && <button type="button" onClick={onReselect} className="device-control-button px-7 py-3.5 text-sm font-medium">Adjust Object Field</button>}
       </div>
     </div>
