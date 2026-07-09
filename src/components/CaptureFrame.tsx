@@ -17,7 +17,7 @@ export default function CaptureFrame({
 }: CaptureFrameProps) {
   return (
     <div
-      className={`relative isolate overflow-hidden rounded-[2rem] border border-[var(--capsule-line-dark)] bg-[var(--capsule-panel-black)] shadow-[inset_0_1px_0_rgba(242,239,234,0.16),inset_0_-28px_70px_rgba(0,0,0,0.42),0_28px_80px_rgba(0,0,0,0.28)] ${className}`}
+      className={`capture-frame relative isolate overflow-hidden rounded-[2rem] border border-[var(--capsule-line-dark)] bg-[var(--capsule-panel-black)] shadow-[inset_0_1px_0_rgba(242,239,234,0.16),inset_0_-28px_70px_rgba(0,0,0,0.42),0_28px_80px_rgba(0,0,0,0.28)] ${className}`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_48%,rgba(96,112,123,0.16),transparent_42%),linear-gradient(180deg,rgba(242,239,234,0.08),rgba(242,239,234,0.015))]" />
       {mode !== "live" && (
@@ -35,7 +35,7 @@ export default function CaptureFrame({
       <div className="pointer-events-none absolute right-5 top-5 z-20 rounded-full border border-white/14 bg-black/24 px-3 py-1.5 backdrop-blur">
         <span className="mono-label text-[0.56rem] text-white/58">{status}</span>
       </div>
-      <div className="relative z-10 flex min-h-[318px] items-center justify-center">{children}</div>
+      <div className="capture-frame__body relative z-10 flex min-h-[318px] items-center justify-center">{children}</div>
     </div>
   );
 }

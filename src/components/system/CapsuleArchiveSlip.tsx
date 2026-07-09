@@ -42,7 +42,7 @@ export default function CapsuleArchiveSlip({ eyebrow, title, rows = [], mode = "
             return (
               <div key={label} className={joinClasses("grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b py-2.5 last:border-b-0", preservation ? "border-white/10" : "border-[rgba(17,16,17,0.08)]")}>
                 <dt className={joinClasses("mono-label text-[0.46rem]", preservation ? "text-[var(--capsule-linen-ash)]" : "text-[var(--capsule-muted)]")}>{label}</dt>
-                <dd className={joinClasses("max-w-[8.5rem] truncate text-right font-mono text-[0.58rem]", preservation ? "text-white" : "text-[var(--capsule-black)]")}>{value}</dd>
+                <dd className={joinClasses("capsule-archive-slip__value max-w-[8.5rem] truncate text-right font-mono text-[0.58rem]", preservation ? "text-white" : "text-[var(--capsule-black)]")}>{value}</dd>
               </div>
             );
           })}
