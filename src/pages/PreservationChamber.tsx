@@ -1,15 +1,14 @@
-import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ExtractionReadout from "../components/ExtractionReadout";
-import PreservationField from "../components/PreservationField";
-import PreservationStageLine from "../components/PreservationStageLine";
-import ScanChecklist from "../components/ScanChecklist";
-import SpecimenStage from "../components/SpecimenStage";
-import TopBar from "../components/TopBar";
+import CapsuleArchiveSlip from "../components/system/CapsuleArchiveSlip";
+import CapsuleBottomDock from "../components/system/CapsuleBottomDock";
+import CapsuleObjectPlate from "../components/system/CapsuleObjectPlate";
+import CapsulePhoneFrame from "../components/system/CapsulePhoneFrame";
+import CapsuleScreenHeader from "../components/system/CapsuleScreenHeader";
+import ProcessingOrb from "../components/preservation/ProcessingOrb";
 import { ROUTES } from "../constants/navigation";
 import { usePreservationSession } from "../context/PreservationSessionContext";
-import { primaryArtifact } from "../data/artifacts";
 import { generateArtifact } from "../services/artifactApi";
 import { processSpecimenImages } from "../services/specimenProcessing";
 import type { PreservationStage } from "../types/artifact";
@@ -26,6 +25,8 @@ const statusText: Record<PreservationStage, string> = {
   preserved: "Record ready for review.",
   sealed: "Artifact record filed.",
 };
+
+const joinClasses = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(" ");
 
 export default function PreservationChamber() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function PreservationChamber() {
   const activeIndex = Math.max(0, preservationStages.indexOf(session.activeStage));
   const activeInput = session.input;
   const chamberImage = session.artifact ? getArtifactHeroImage(session.artifact) : activeInput?.specimenImageDataUrl || activeInput?.imageDataUrl || "";
-  const objectLabel = session.artifact?.commonName || activeInput?.objectName || primaryArtifact.commonName;
+  const objectLabel = session.artifact?.commonName || activeInput?.objectName || "preserved object";
   const extraction = session.artifact?.extraction || activeInput?.extraction;
   const hasManualExtraction = extraction?.method === "manual-object-field" || Boolean(session.artifact?.objectBoundary || activeInput?.objectBoundary);
   const hasSourceRetained = Boolean((session.artifact?.sourceImageDataUrl && session.artifact?.specimenImageDataUrl) || (activeInput?.sourceImageDataUrl && activeInput?.specimenImageDataUrl));
@@ -54,13 +55,12 @@ export default function PreservationChamber() {
   const isPreserving = session.status === "preserving";
   const isComplete = session.status === "complete" && Boolean(session.artifact);
   const hasCapture = Boolean(activeInput || session.artifact);
-  const checklistStatus = session.status === "complete" ? "done" : isPreserving ? "preserving" : "idle";
 
   const chamberTitle = useMemo(() => {
-    if (session.status === "error") return "Preservation Interrupted";
-    if (isComplete) return "Record Ready for Review";
-    if (isPreserving) return "Preservation Chamber";
-    return "Preservation Chamber";
+    if (session.status === "error") return "Preservation interrupted.";
+    if (isComplete) return "Record ready.";
+    if (isPreserving) return "Forming the record.";
+    return "Preservation chamber.";
   }, [isComplete, isPreserving, session.status]);
 
   const stateCopy = useMemo(() => {
@@ -146,149 +146,139 @@ export default function PreservationChamber() {
 
   if (!hasCapture) {
     return (
-      <main className="capsule-mode-preservation instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-        <TopBar fossilId={primaryArtifact.id} tone="dark" contextLabel="PRESERVATION CHAMBER" />
-        <section className="mx-auto flex min-h-[70dvh] w-full max-w-3xl flex-col items-center justify-center px-5 text-center sm:px-8">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">PRESERVATION CHAMBER</p>
-          <h1 className="mt-4 text-3xl font-semibold uppercase tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">No active preservation.</h1>
-          <p className="mt-4 max-w-md text-sm leading-6 text-[var(--capsule-ash-dim)]">Present source evidence to begin preservation, or return to the Vault.</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <button onClick={() => navigate(ROUTES.vault)} className="device-control-button px-7 py-3.5 text-sm font-medium">
-              Go to Vault
-            </button>
-            <button onClick={() => navigate(ROUTES.capture)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-              Preserve Object
-            </button>
-          </div>
-        </section>
-      </main>
+      <CapsulePhoneFrame mode="preservation" footer={<CapsuleBottomDock mode="preservation" />}>
+        <CapsuleScreenHeader
+          mode="preservation"
+          eyebrow="Preservation Chamber"
+          title="No active preservation."
+          subtitle="Present source evidence to begin, or return to the Vault."
+          leading={{ label: "x", ariaLabel: "Return to Vault", onClick: () => navigate(ROUTES.vault) }}
+        />
+        <CapsuleArchiveSlip
+          mode="preservation"
+          eyebrow="CHAMBER STATE"
+          title="Waiting for source evidence."
+          rows={[
+            ["Source", "not received"],
+            ["Object field", "not sealed"],
+            ["Record", "not formed"],
+          ]}
+          className="mt-8"
+        />
+        <div className="mt-5 grid gap-2">
+          <button type="button" onClick={() => navigate(ROUTES.capture)} className="h-10 rounded-full bg-[var(--capsule-cream)] px-5 text-[0.62rem] font-semibold text-[var(--capsule-black)]">
+            Preserve Object
+          </button>
+          <button type="button" onClick={() => navigate(ROUTES.vault)} className="device-control-button px-5 py-2.5 text-[0.58rem] font-medium">
+            Go to Vault
+          </button>
+        </div>
+      </CapsulePhoneFrame>
     );
   }
 
   return (
-    <main className="capsule-mode-preservation instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-      <TopBar fossilId={session.artifact?.id || primaryArtifact.id} tone="dark" contextLabel="PRESERVATION CHAMBER" />
-      <section className="mx-auto grid w-full max-w-[92rem] gap-5 px-4 pb-10 pt-1 sm:px-8 lg:grid-cols-[14rem_minmax(0,1fr)_15rem] lg:px-10">
-        <motion.aside
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15 }}
-          className="hidden lg:order-1 lg:block lg:pt-36"
-        >
-          <ScanChecklist status={checklistStatus} />
-          <div className="instrument-card-dark mt-4 rounded-2xl p-5">
-            <p className="mono-label text-[0.6rem] text-[var(--capsule-ash-dim)]">Object</p>
-            <p className="mt-3 text-sm font-medium text-[var(--capsule-bone)]">{objectLabel}</p>
-            <p className="mt-5 mono-label text-[0.6rem] text-[var(--capsule-ash-dim)]">Origin</p>
-            <p className="mt-3 text-xs leading-5 text-[var(--capsule-ash-dim)]">{activeInput?.origin || session.artifact?.origin || primaryArtifact.origin}</p>
-          </div>
-        </motion.aside>
+    <CapsulePhoneFrame mode="preservation" footer={<CapsuleBottomDock mode="preservation" />}>
+      <CapsuleScreenHeader
+        mode="preservation"
+        eyebrow={isComplete ? "Artifact Review Ready" : "Preservation Chamber"}
+        title={chamberTitle}
+        subtitle="Capsule is forming the artifact record from the selected object field."
+        marker
+        trailing={hasCapture && session.status !== "preserving" ? { label: "+", ariaLabel: "New source evidence", onClick: resetSession } : undefined}
+      />
 
-        <motion.div
-          initial={{ opacity: 0, y: 18, scale: 0.985 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.9, ease: "easeOut" }}
-          className="order-1 lg:order-2"
-        >
-          <div className="mb-7 flex items-end justify-between gap-4 px-1">
-            <div>
-              <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">{isComplete ? "ARTIFACT REVIEW READY" : "PRESERVATION CHAMBER"}</p>
-              <h1 className="mt-2 text-3xl font-semibold uppercase leading-none tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">{chamberTitle}</h1>
-              <p className="mt-3 max-w-md text-sm leading-6 text-[var(--capsule-ash-dim)]">Capsule is forming the artifact record from the selected object field.</p>
-            </div>
-            <span className="hidden rounded-full border border-[var(--capsule-line-dark)] bg-white/[0.055] px-3 py-1.5 font-mono text-[0.68rem] text-[var(--capsule-ash-dim)] sm:inline">
-              {isComplete ? "review ready" : isPreserving ? statusText[session.activeStage] : "source received"}
-            </span>
-          </div>
-          {isComplete && session.artifact ? (
-            <PreservationField mode="chamber" imageDataUrl={chamberImage} imageAlt={objectLabel} motionSeed={session.artifact.render?.motionSeed} render={session.artifact.render} />
-          ) : (
-            <SpecimenStage
-              tone="dark"
-              showScanLine={isPreserving}
-              showMarkers
-              imageDataUrl={chamberImage}
-              imageAlt={objectLabel}
-              showIsolationChip={Boolean(chamberImage)}
-              isolationLabel={hasManualExtraction ? "Isolation: manual" : "Isolation: simulated"}
-            />
-          )}
-          <PreservationStageLine activeIndex={activeIndex} />
-          <div className="mx-auto mt-5 max-w-2xl rounded-2xl border border-[var(--capsule-line-dark)] bg-white/[0.055] p-4 text-center lg:hidden">
-            <p className="mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">PRESERVATION STATE</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--capsule-bone)]">{session.error || stateCopy}</p>
-          </div>
-          {hasManualExtraction && (
-            <div className="mt-4 hidden space-y-3 lg:block">
-              <div className="flex flex-wrap justify-center gap-2">
-                <span className="mono-label rounded-full border border-[rgba(154,149,86,0.34)] bg-white/[0.055] px-3 py-1.5 text-[0.56rem] text-[var(--capsule-mineral-olive-bright)]">OBJECT FIELD LOCKED</span>
-                <span className="mono-label rounded-full border border-[var(--capsule-line-dark)] bg-white/[0.055] px-3 py-1.5 text-[0.56rem] text-[var(--capsule-ash-dim)]">ISOLATION: MANUAL</span>
-                {hasSourceRetained && <span className="mono-label rounded-full border border-[var(--capsule-line-dark)] bg-white/[0.055] px-3 py-1.5 text-[0.56rem] text-[var(--capsule-ash-dim)]">SOURCE RETAINED</span>}
-              </div>
-              <div className="mx-auto max-w-2xl rounded-[1.35rem] border border-[rgba(23,25,28,0.08)] bg-[rgba(13,14,16,0.86)] p-3">
-                <ExtractionReadout confidence={extractionConfidence} method="manual-object-field" sourceRetained={hasSourceRetained} boundaryLocked compact />
-              </div>
-            </div>
-          )}
-          <div className="sticky bottom-0 z-30 -mx-4 mt-7 flex flex-wrap items-center justify-center gap-3 border-t border-[var(--capsule-line-dark)] bg-[rgba(13,14,16,0.88)] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
-            {activeInput && session.status === "intake" && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Preparing chamber...</button>}
-            {isPreserving && <button disabled className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] opacity-80 shadow-[0_18px_42px_rgba(0,0,0,0.32)]">Forming record...</button>}
-            {isComplete && session.artifact && (
-              <button onClick={() => navigate(ROUTES.review)} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-                Review Artifact Record
-              </button>
-            )}
-            {session.status === "error" && activeInput && (
-              <>
-                <button onClick={retryPreservation} className="min-h-11 rounded-full bg-[var(--capsule-bone)] px-7 py-3.5 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-                  Retry Preservation
-                </button>
-                <button onClick={() => navigate(ROUTES.capture)} className="device-control-button px-7 py-3.5 text-sm font-medium">
-                  Return to Preserve
-                </button>
-              </>
-            )}
-          </div>
-          {hasManualExtraction && (
-            <div className="mx-auto mt-5 max-w-2xl rounded-[1.25rem] border border-[rgba(13,14,16,0.1)] bg-[rgba(13,14,16,0.9)] p-3 lg:hidden">
-              <ExtractionReadout confidence={extractionConfidence} method="manual-object-field" sourceRetained={hasSourceRetained} boundaryLocked compact />
-            </div>
-          )}
-        </motion.div>
+      <div className="mt-7">
+        <ProcessingOrb label={session.error || stateCopy} progress={Math.round(session.progress || 0)} className="p-0" />
+      </div>
 
-        <motion.aside
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25 }}
-          className="hidden lg:order-3 lg:block lg:pt-36"
-        >
-          <div className="instrument-card-dark rounded-2xl p-5">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[var(--capsule-mineral-olive)] shadow-[0_0_0_6px_var(--capsule-mineral-olive-soft)]" />
-              <p className="mono-label text-[0.6rem] text-[var(--capsule-ash-dim)]">Preservation State</p>
+      <div className="mt-5 grid grid-cols-5 items-start gap-2" aria-label="Preservation stage">
+        {preservationStages.map((stage, index) => {
+          const active = index === activeIndex;
+          const complete = index < activeIndex || isComplete;
+
+          return (
+            <div key={stage} className="flex flex-col items-center gap-2">
+              <span
+                className={joinClasses(
+                  "h-2.5 w-2.5 rounded-full border",
+                  active ? "border-[var(--capsule-red)] bg-[var(--capsule-red)] shadow-[0_0_0_7px_rgba(152,57,49,0.16)]" : complete ? "border-[var(--capsule-gold)] bg-[var(--capsule-gold)]" : "border-white/14 bg-white/5",
+                )}
+                aria-hidden="true"
+              />
+              <span className={joinClasses("mono-label text-center text-[0.46rem]", active ? "text-[var(--capsule-coral)]" : complete ? "text-[var(--capsule-gold)]" : "text-[var(--capsule-linen-ash)]")}>
+                {stage}
+              </span>
             </div>
-            <h2 className="mt-5 text-xl font-semibold text-[var(--capsule-bone)]">{session.status === "error" ? "Interrupted" : isComplete ? "Record Ready" : isPreserving ? "Forming Record" : "Ready"}</h2>
-            <p className="mt-2 text-xs leading-5 text-[var(--capsule-ash-dim)]">{session.error || stateCopy}</p>
-            <div className="mt-8 flex items-end justify-between border-t border-[var(--capsule-line-dark)] pt-5">
-              <span className="mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">Record Formation</span>
-              <span className="font-mono text-2xl text-[var(--capsule-bone)]">{Math.round(session.progress || 0)}%</span>
-            </div>
-          </div>
-          <div className="instrument-card-dark mt-4 rounded-2xl p-5">
-            {preservationStages.map((stage, index) => (
-              <div key={stage} className="flex items-center gap-3 border-b border-[var(--capsule-line-dark)] py-3 last:border-0">
-                <span className="font-mono text-xs text-[var(--capsule-coral)]">0{index + 1}</span>
-                <span className="text-xs text-[var(--capsule-ash-dim)]">{statusText[stage]}</span>
-              </div>
-            ))}
-          </div>
-          {hasCapture && session.status !== "preserving" && (
-            <button onClick={resetSession} className="device-control-button mt-4 w-full px-5 py-3 text-sm font-medium">
-              New Source Evidence
+          );
+        })}
+      </div>
+
+      {isComplete && session.artifact ? (
+        <CapsuleObjectPlate
+          mode="preservation"
+          imageSrc={chamberImage}
+          imageAlt={objectLabel}
+          label="Review specimen"
+          revealed
+          className="mt-6"
+        />
+      ) : null}
+
+      <CapsuleArchiveSlip
+        mode="preservation"
+        eyebrow="PRESERVATION STATE"
+        title={session.status === "error" ? "Interrupted" : isComplete ? "Record ready" : isPreserving ? "Forming record" : "Source received"}
+        rows={[
+          ["Object", objectLabel],
+          ["Origin", activeInput?.origin || session.artifact?.origin || "not recorded"],
+          ["Source", hasSourceRetained ? "retained" : "pending"],
+          ["Object field", hasManualExtraction ? "locked" : "simulated"],
+        ]}
+        className="mt-5"
+      >
+        <p className="mt-3 text-[0.68rem] leading-5 text-white/58">{session.error || stateCopy}</p>
+      </CapsuleArchiveSlip>
+
+      {hasManualExtraction ? (
+        <div className="mt-4 rounded-[18px] border border-white/[0.08] bg-white/[0.04] p-3">
+          <ExtractionReadout
+            confidence={extractionConfidence}
+            method={extraction?.method || "manual-object-field"}
+            sourceRetained={hasSourceRetained}
+            boundaryLocked
+            compact
+          />
+        </div>
+      ) : null}
+
+      <div className="mt-5 grid gap-2">
+        {activeInput && session.status === "intake" ? (
+          <button type="button" disabled className="h-10 rounded-full bg-[var(--capsule-cream)] px-5 text-[0.62rem] font-semibold text-[var(--capsule-black)] opacity-80">
+            Preparing chamber...
+          </button>
+        ) : null}
+        {isPreserving ? (
+          <button type="button" disabled className="h-10 rounded-full bg-[var(--capsule-cream)] px-5 text-[0.62rem] font-semibold text-[var(--capsule-black)] opacity-80">
+            Forming record...
+          </button>
+        ) : null}
+        {isComplete && session.artifact ? (
+          <button type="button" onClick={() => navigate(ROUTES.review)} className="h-10 rounded-full bg-[var(--capsule-cream)] px-5 text-[0.62rem] font-semibold text-[var(--capsule-black)] shadow-[0_18px_42px_rgba(0,0,0,0.28)]">
+            Review Artifact Record
+          </button>
+        ) : null}
+        {session.status === "error" && activeInput ? (
+          <>
+            <button type="button" onClick={retryPreservation} className="h-10 rounded-full bg-[var(--capsule-cream)] px-5 text-[0.62rem] font-semibold text-[var(--capsule-black)]">
+              Retry Preservation
             </button>
-          )}
-        </motion.aside>
-      </section>
-    </main>
+            <button type="button" onClick={() => navigate(ROUTES.capture)} className="device-control-button px-5 py-2.5 text-[0.58rem] font-medium">
+              Return to Preserve
+            </button>
+          </>
+        ) : null}
+      </div>
+    </CapsulePhoneFrame>
   );
 }

@@ -1,13 +1,11 @@
-import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import ArtifactActions from "../components/ArtifactActions";
-import BottomNav from "../components/BottomNav";
-import MetadataTable from "../components/MetadataTable";
-import PreservationField from "../components/PreservationField";
 import RelatedObjectSeed from "../components/artifact/RelatedObjectSeed";
-import SourceEvidenceSlip from "../components/artifact/SourceEvidenceSlip";
-import TopBar from "../components/TopBar";
+import CapsuleArchiveSlip from "../components/system/CapsuleArchiveSlip";
+import CapsuleBottomDock from "../components/system/CapsuleBottomDock";
+import CapsuleObjectPlate from "../components/system/CapsuleObjectPlate";
+import CapsulePhoneFrame from "../components/system/CapsulePhoneFrame";
+import CapsuleScreenHeader from "../components/system/CapsuleScreenHeader";
 import { ROUTES } from "../constants/navigation";
 import { addObservation, loadArtifacts, sealArtifact } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
@@ -42,6 +40,17 @@ const formatPressureLabel = (value: string) =>
   value
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/\b\w/g, (character) => character.toUpperCase());
+
+const CompactRows = ({ rows }: { rows: Array<[string, string]> }) => (
+  <dl className="grid gap-2 text-[0.68rem] leading-5 text-[var(--capsule-black)]">
+    {rows.map(([label, value]) => (
+      <div key={label} className="grid grid-cols-[5.6rem_1fr] gap-3 border-b border-[rgba(17,16,17,0.08)] pb-2 last:border-0">
+        <dt className="mono-label text-[0.46rem] text-[var(--capsule-muted)]">{label}</dt>
+        <dd>{value}</dd>
+      </div>
+    ))}
+  </dl>
+);
 
 export default function ArtifactView() {
   const { id } = useParams();
@@ -78,27 +87,38 @@ export default function ArtifactView() {
 
   if (isLoading) {
     return (
-      <main className="capsule-mode-archive record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-        <TopBar fossilId={id || "CF-00000"} contextLabel="ARTIFACT RECORD" />
-        <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 text-center">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Opening artifact record.</p>
-        </section>
-      </main>
+      <CapsulePhoneFrame mode="archive" footer={<CapsuleBottomDock />}>
+        <CapsuleScreenHeader eyebrow="Artifact Record" title="Opening record." subtitle={id || "CAP-00000"} />
+        <CapsuleArchiveSlip
+          eyebrow="RECORD STATE"
+          title="Retrieving preserved object."
+          rows={[
+            ["Capsule ID", id || "not recorded"],
+            ["Vault", "reading"],
+          ]}
+          className="mt-8"
+        />
+      </CapsulePhoneFrame>
     );
   }
 
   if (!artifact) {
     return (
-      <main className="capsule-mode-archive record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-        <TopBar fossilId={id || "CF-00000"} contextLabel="ARTIFACT RECORD" />
-        <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 text-center">
-          <p className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">Artifact record not found.</p>
-          <h1 className="mt-4 text-4xl font-semibold uppercase tracking-[0.04em]">No preserved object here</h1>
-          <Link to={ROUTES.vault} className="primary-button mt-8 inline-flex px-6 py-3 text-sm font-medium">
-            Return to Vault
-          </Link>
-        </section>
-      </main>
+      <CapsulePhoneFrame mode="archive" footer={<CapsuleBottomDock />}>
+        <CapsuleScreenHeader eyebrow="Artifact Record" title="No preserved object here." subtitle={id || "CAP-00000"} />
+        <CapsuleArchiveSlip
+          eyebrow="RECORD STATE"
+          title="Artifact record not found."
+          rows={[
+            ["Capsule ID", id || "not recorded"],
+            ["Vault", "no match"],
+          ]}
+          className="mt-8"
+        />
+        <Link to={ROUTES.vault} className="mt-5 flex h-10 items-center justify-center rounded-full bg-[var(--capsule-black)] px-5 text-[0.62rem] font-semibold text-white">
+          Return to Vault
+        </Link>
+      </CapsulePhoneFrame>
     );
   }
 
@@ -115,7 +135,7 @@ export default function ArtifactView() {
     ["Materials", artifactRecord.observedFacts.materialTags.join(", ") || "not classified"],
     ...(artifactRecord.observedFacts.colors.length ? ([["Colors", artifactRecord.observedFacts.colors.join(", ")]] as Array<[string, string]>) : []),
     ...(artifactRecord.observedFacts.visibleText.length ? ([["Visible text", artifactRecord.observedFacts.visibleText.join(", ")]] as Array<[string, string]>) : []),
-    ...(artifactRecord.observedFacts.sceneContext ? ([["Scene context", artifactRecord.observedFacts.sceneContext]] as Array<[string, string]>) : []),
+    ...(artifactRecord.observedFacts.sceneContext ? ([["Scene", artifactRecord.observedFacts.sceneContext]] as Array<[string, string]>) : []),
   ];
   const userContextRows: Array<[string, string]> = [
     ...(artifactRecord.identity.userGivenName ? ([["Object name", artifactRecord.identity.userGivenName]] as Array<[string, string]>) : []),
@@ -138,12 +158,12 @@ export default function ArtifactView() {
     ...(artifact.ai ? ([[artifact.ai.usedFallback ? "Generator" : "Provider", `${artifact.ai.provider} / ${artifact.ai.model}`]] as Array<[string, string]>) : []),
   ];
   const sourceEvidenceImage = artifactRecord.source.originalImageDataUrl || provenanceImage;
-  const sourceEvidenceMetrics = [
-    { label: "Original", value: artifactRecord.source.originalImageDataUrl ? "retained" : "not recorded" },
-    { label: "Specimen", value: artifactRecord.source.specimenImageDataUrl ? "retained" : "not recorded" },
-    { label: "Isolated", value: artifactRecord.source.isolatedSpecimenDataUrl ? "retained" : "not recorded" },
-    { label: "Render", value: artifactRecord.source.artifactRenderDataUrl ? "retained" : "not recorded" },
-    { label: "Boundary", value: artifactRecord.source.objectBoundary ? "recorded" : "not recorded" },
+  const sourceEvidenceRows: Array<[string, string]> = [
+    ["Original", artifactRecord.source.originalImageDataUrl ? "retained" : "not recorded"],
+    ["Specimen", artifactRecord.source.specimenImageDataUrl ? "retained" : "not recorded"],
+    ["Isolated", artifactRecord.source.isolatedSpecimenDataUrl ? "retained" : "not recorded"],
+    ["Render", artifactRecord.source.artifactRenderDataUrl ? "retained" : "not recorded"],
+    ["Boundary", artifactRecord.source.objectBoundary ? "recorded" : "not recorded"],
   ];
   const relatedSeed = findRelatedArtifactSeed(artifact, allArtifacts);
   const renderLabel =
@@ -174,229 +194,207 @@ export default function ArtifactView() {
   };
 
   return (
-    <main className="capsule-mode-archive record-shell min-h-screen pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-      <TopBar fossilId={artifact.id} contextLabel="ARTIFACT RECORD" />
-      <section className="mx-auto w-full max-w-[84rem] px-4 pb-20 sm:px-8 lg:px-10">
-        <div className="mx-auto max-w-[55rem] pb-7 pt-2 sm:pb-10">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[var(--capsule-mineral-olive)] shadow-[0_0_0_6px_var(--capsule-mineral-olive-soft)]" />
-            <span className="mono-label text-[0.68rem] text-[var(--capsule-ash)]">ARTIFACT</span>
-          </div>
-          <h1 className="mt-4 text-3xl font-semibold uppercase tracking-[0.035em] sm:text-6xl">{recordTitle}</h1>
-          <p className="mt-3 font-mono text-xs uppercase tracking-[0.18em] text-[var(--capsule-ash)]">Preserved {artifact.capturePoint}</p>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--capsule-ash)] sm:mt-6 sm:text-xl sm:leading-9">{artifactRecord.interpretiveLayer.continuityNote}</p>
-        </div>
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <PreservationField mode="record" imageDataUrl={heroImage} imageAlt={recordTitle} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
-        </motion.div>
-        <div className="mt-10 sm:mt-14">
-          <ArtifactActions
-            sealed={sealed}
-            onSeal={() => void handleSeal()}
-            onAddObservation={() => setShowObservationInput((value) => !value)}
-            onViewTimeline={() => timelineRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+    <CapsulePhoneFrame mode="archive" footer={<CapsuleBottomDock />}>
+      <CapsuleScreenHeader
+        eyebrow="Artifact Record"
+        title={recordTitle}
+        subtitle={`Preserved ${artifact.capturePoint}`}
+        marker={sealed}
+      />
+
+      <CapsuleObjectPlate
+        imageSrc={heroImage}
+        imageAlt={recordTitle}
+        label={artifact.id}
+        revealed={sealed}
+        className="mt-5"
+      />
+
+      <CapsuleArchiveSlip
+        eyebrow="OBJECT IDENTITY"
+        title={artifactRecord.interpretiveLayer.artifactClass}
+        rows={[
+          ["Capsule ID", artifact.id],
+          ["Origin", artifactRecord.source.origin || "not recorded"],
+          ["Collection", artifactRecord.identity.collection || "not recorded"],
+          ["State", artifact.preservationState],
+        ]}
+        className="mt-4"
+      >
+        <p className="mt-3 text-[0.72rem] leading-5 text-[var(--capsule-muted)]">{artifactRecord.interpretiveLayer.continuityNote}</p>
+      </CapsuleArchiveSlip>
+
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Link to={ROUTES.vault} className="flex h-9 items-center justify-center rounded-full bg-[var(--capsule-black)] px-4 text-[0.56rem] font-semibold text-white">
+          Back to Vault
+        </Link>
+        <Link to={ROUTES.capture} className="flex h-9 items-center justify-center rounded-full border border-[rgba(17,16,17,0.1)] px-4 text-[0.56rem] font-medium text-[var(--capsule-muted)]">
+          Preserve Another
+        </Link>
+        {!sealed ? (
+          <button type="button" onClick={() => void handleSeal()} className="h-9 rounded-full border border-[rgba(17,16,17,0.1)] px-4 text-[0.56rem] font-medium text-[var(--capsule-muted)]">
+            Seal Record
+          </button>
+        ) : null}
+        <button type="button" onClick={() => setShowObservationInput((value) => !value)} className="h-9 rounded-full border border-[rgba(17,16,17,0.1)] px-4 text-[0.56rem] font-medium text-[var(--capsule-muted)]">
+          Add Observation
+        </button>
+        <button type="button" onClick={() => timelineRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} className="col-span-2 h-9 rounded-full border border-[rgba(17,16,17,0.1)] px-4 text-[0.56rem] font-medium text-[var(--capsule-muted)]">
+          View Timeline
+        </button>
+      </div>
+
+      {showObservationInput ? (
+        <section className="capsule-surface-paper mt-4 p-4">
+          <label className="mono-label text-[0.5rem] text-[var(--capsule-red)]">OBSERVATION</label>
+          <textarea
+            value={observationText}
+            onChange={(event) => setObservationText(event.target.value)}
+            rows={3}
+            placeholder="Add a precise note about this artifact..."
+            className="mt-3 w-full resize-none border-b border-[rgba(17,16,17,0.1)] bg-transparent text-[0.72rem] leading-5 text-[var(--capsule-black)] outline-none placeholder:text-[var(--capsule-muted)]"
           />
-          <div className="mt-8">
-            <MetadataTable artifact={artifact} />
-          </div>
-          {showObservationInput && (
-            <div className="mx-auto mt-5 max-w-4xl rounded-2xl border border-[var(--capsule-line)] bg-white/54 p-5">
-              <label className="mono-label text-[0.64rem] text-[var(--capsule-ash)]">Observation</label>
-              <textarea
-                value={observationText}
-                onChange={(event) => setObservationText(event.target.value)}
-                rows={3}
-                placeholder="Add a precise note about this artifact..."
-                className="mt-3 w-full resize-none bg-transparent text-sm leading-6 text-[var(--capsule-graphite)] outline-none placeholder:text-[var(--capsule-ash)]"
-              />
-              <button onClick={() => void handleAddObservation()} className="primary-button mt-4 min-w-0 px-5 py-3 text-sm font-medium">
-                Save Observation
-              </button>
-            </div>
-          )}
+          <button type="button" onClick={() => void handleAddObservation()} className="mt-4 h-9 w-full rounded-full bg-[var(--capsule-black)] px-5 text-[0.58rem] font-semibold text-white">
+            Save Observation
+          </button>
+        </section>
+      ) : null}
+
+      <section className="capsule-surface-paper mt-4 p-4">
+        <p className="mono-label text-[0.5rem] text-[var(--capsule-red)]">OBSERVED BY CAPSULE</p>
+        <div className="mt-4">
+          <CompactRows rows={observedRows} />
         </div>
-
-        <details className="mx-auto mt-14 max-w-4xl border-t border-[var(--capsule-line)] pt-8 sm:mt-20 sm:pt-10">
-          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Record</summary>
-          <div className="mt-6 space-y-10">
-            <section>
-              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Observed by Capsule</p>
-              <dl className="mt-5 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
-                {observedRows.map(([label, value]) => (
-                  <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
-                    <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
-                    <dd className="mt-1">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-              {visibleDetails.length ? (
-                <div className="mt-6">
-                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Shape and silhouette</p>
-                  <ul className="mt-3 space-y-3 text-sm leading-6 text-[var(--capsule-graphite)]">
-                    {visibleDetails.map((detail, index) => (
-                      <li key={`${detail}-${index}`} className="border-b border-[rgba(229,226,220,0.62)] pb-3">{detail}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {marksAndWear.length ? (
-                <div className="mt-6">
-                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Marks and wear</p>
-                  <ul className="mt-3 space-y-3 text-sm leading-6 text-[var(--capsule-graphite)]">
-                    {marksAndWear.map((detail, index) => (
-                      <li key={`${detail}-${index}`} className="border-b border-[rgba(229,226,220,0.62)] pb-3">{detail}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </section>
-
-            <section>
-              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">User Context</p>
-              {userContextRows.length ? (
-                <dl className="mt-5 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
-                  {userContextRows.map(([label, value]) => (
-                    <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
-                      <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
-                      <dd className="mt-1">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : (
-                <p className="mt-5 text-sm leading-6 text-[var(--capsule-ash)]">No user context attached.</p>
-              )}
-            </section>
-
-            <section>
-              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Inferred by Capsule</p>
-              <div className="mt-5 grid gap-8 md:grid-cols-2">
-                <div>
-                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Continuity note</p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--capsule-graphite)]">{artifactRecord.interpretiveLayer.continuityNote}</p>
-                  {artifactRecord.interpretiveLayer.memoryHypothesis && (
-                    <>
-                      <p className="mt-6 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Memory hypothesis</p>
-                      <p className="mt-3 text-sm leading-7 text-[var(--capsule-graphite)]">{artifactRecord.interpretiveLayer.memoryHypothesis}</p>
-                    </>
-                  )}
-                  <p className="mt-6 text-xs leading-5 text-[var(--capsule-ash)]">
-                    {artifactRecord.interpretiveLayer.doNotOverclaim ? "Interpretation marked cautious." : "Interpretation caution flag not set."}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">Pressure trace</p>
-                  <dl className="mt-3 space-y-3 text-sm text-[var(--capsule-graphite)]">
-                    {pressureTraceRows.map(([label, value]) => (
-                      <div key={label} className="grid grid-cols-[minmax(0,1fr)_4rem] gap-4 border-b border-[rgba(229,226,220,0.62)] pb-3">
-                        <dt>{label}</dt>
-                        <dd className="text-right font-mono text-xs text-[var(--capsule-ash)]">{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <p className="mono-label text-[0.66rem] text-[var(--capsule-ash)]">Model Provenance</p>
-              {modelRows.length ? (
-                <dl className="mt-5 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
-                  {modelRows.map(([label, value]) => (
-                    <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
-                      <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
-                      <dd className="mt-1">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : (
-                <p className="mt-5 text-sm leading-6 text-[var(--capsule-ash)]">No model metadata recorded.</p>
-              )}
-              <dl className="mt-6 grid gap-3 text-sm leading-6 text-[var(--capsule-graphite)] sm:grid-cols-2">
-                {confidenceRows.map(([label, value]) => (
-                  <div key={label} className="border-b border-[rgba(229,226,220,0.62)] pb-3">
-                    <dt className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--capsule-ash)]">{label}</dt>
-                    <dd className="mt-1 font-mono text-xs">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
+        {visibleDetails.length ? (
+          <div className="mt-4">
+            <p className="mono-label text-[0.46rem] text-[var(--capsule-muted)]">Shape and silhouette</p>
+            <ul className="mt-2 space-y-2 text-[0.68rem] leading-5 text-[var(--capsule-black)]">
+              {visibleDetails.map((detail, index) => (
+                <li key={`${detail}-${index}`} className="border-b border-[rgba(17,16,17,0.08)] pb-2">{detail}</li>
+              ))}
+            </ul>
           </div>
-        </details>
-
-        {sourceEvidenceImage && (
-          <div className="mx-auto mt-16 max-w-4xl">
-            <SourceEvidenceSlip title="Source Evidence" sourceImageSrc={sourceEvidenceImage} sourceImageAlt={`${recordTitle} source evidence`} metrics={sourceEvidenceMetrics} />
+        ) : null}
+        {marksAndWear.length ? (
+          <div className="mt-4">
+            <p className="mono-label text-[0.46rem] text-[var(--capsule-muted)]">Marks and wear</p>
+            <ul className="mt-2 space-y-2 text-[0.68rem] leading-5 text-[var(--capsule-black)]">
+              {marksAndWear.map((detail, index) => (
+                <li key={`${detail}-${index}`} className="border-b border-[rgba(17,16,17,0.08)] pb-2">{detail}</li>
+              ))}
+            </ul>
           </div>
-        )}
+        ) : null}
+      </section>
 
-        <RelatedObjectSeed seed={relatedSeed} />
+      <CapsuleArchiveSlip
+        eyebrow="USER CONTEXT"
+        title={userContextRows.length ? "Attached provenance" : "No user context attached."}
+        rows={userContextRows.length ? userContextRows : [["Context", "not recorded"]]}
+        className="mt-4"
+      />
 
-        <details ref={timelineRef} className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
-          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Timeline</summary>
-          <div className="mt-6 space-y-5">
-            {artifact.timeline.map((event) => (
-              <div key={event.id} className="grid gap-2 border-b border-[rgba(229,226,220,0.68)] pb-5 sm:grid-cols-[10rem_1fr]">
-                <p className="font-mono text-xs text-[var(--capsule-ash)]">{new Date(event.date).toLocaleString()}</p>
-                <div>
-                  <p className="text-sm font-semibold text-[var(--capsule-graphite)]">{event.label}</p>
-                  <p className="mt-1 text-sm leading-6 text-[var(--capsule-ash)]">{event.description}</p>
-                </div>
+      <section className="capsule-surface-paper mt-4 p-4">
+        <p className="mono-label text-[0.5rem] text-[var(--capsule-red)]">INFERRED BY CAPSULE</p>
+        <p className="mt-3 text-[0.72rem] leading-5 text-[var(--capsule-black)]">{artifactRecord.interpretiveLayer.continuityNote}</p>
+        {artifactRecord.interpretiveLayer.memoryHypothesis ? (
+          <p className="mt-3 border-t border-[rgba(17,16,17,0.08)] pt-3 text-[0.68rem] leading-5 text-[var(--capsule-muted)]">{artifactRecord.interpretiveLayer.memoryHypothesis}</p>
+        ) : null}
+        <div className="mt-4">
+          <CompactRows rows={pressureTraceRows} />
+        </div>
+        <p className="mt-3 text-[0.64rem] leading-5 text-[var(--capsule-muted)]">
+          {artifactRecord.interpretiveLayer.doNotOverclaim ? "Interpretation marked cautious." : "Interpretation caution flag not set."}
+        </p>
+      </section>
+
+      {sourceEvidenceImage ? (
+        <CapsuleObjectPlate
+          imageSrc={sourceEvidenceImage}
+          imageAlt={`${recordTitle} source evidence`}
+          label="Source evidence"
+          className="mt-4"
+        />
+      ) : null}
+
+      <CapsuleArchiveSlip eyebrow="SOURCE EVIDENCE" title="Retained source references" rows={sourceEvidenceRows} className="mt-4" />
+
+      <CapsuleArchiveSlip
+        eyebrow="MODEL PROVENANCE"
+        title="Record systems"
+        rows={modelRows.length ? modelRows : [["Model metadata", "not recorded"]]}
+        className="mt-4"
+      >
+        {confidenceRows.length ? (
+          <div className="mt-4">
+            <CompactRows rows={confidenceRows} />
+          </div>
+        ) : null}
+      </CapsuleArchiveSlip>
+
+      <RelatedObjectSeed seed={relatedSeed} />
+
+      <details ref={timelineRef} className="mt-8 border-t border-[rgba(17,16,17,0.1)] pt-5">
+        <summary className="cursor-pointer mono-label text-[0.5rem] text-[var(--capsule-muted)]">ARTIFACT TIMELINE</summary>
+        <div className="mt-4 space-y-4">
+          {artifact.timeline.map((event) => (
+            <div key={event.id} className="border-b border-[rgba(17,16,17,0.08)] pb-4">
+              <p className="font-mono text-[0.58rem] text-[var(--capsule-muted)]">{new Date(event.date).toLocaleString()}</p>
+              <p className="mt-2 text-[0.72rem] font-semibold text-[var(--capsule-black)]">{event.label}</p>
+              <p className="mt-1 text-[0.68rem] leading-5 text-[var(--capsule-muted)]">{event.description}</p>
+            </div>
+          ))}
+        </div>
+      </details>
+
+      <details className="mt-8 border-t border-[rgba(17,16,17,0.1)] pt-5">
+        <summary className="cursor-pointer mono-label text-[0.5rem] text-[var(--capsule-muted)]">OBSERVATIONS</summary>
+        {artifact.observations.length ? (
+          <div className="mt-4 space-y-3">
+            {artifact.observations.map((observation) => (
+              <div key={observation.id} className="rounded-[14px] border border-[rgba(17,16,17,0.08)] bg-[var(--capsule-paper)] p-3">
+                <p className="text-[0.68rem] leading-5 text-[var(--capsule-black)]">{observation.text}</p>
+                <p className="mt-2 font-mono text-[0.56rem] text-[var(--capsule-muted)]">{new Date(observation.createdAt).toLocaleString()}</p>
               </div>
             ))}
           </div>
-        </details>
-
-        <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
-          <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Observations</summary>
-          {artifact.observations.length ? (
-            <div className="mt-6 space-y-4">
-              {artifact.observations.map((observation) => (
-                <div key={observation.id} className="rounded-2xl border border-[rgba(229,226,220,0.7)] bg-white/46 p-5">
-                  <p className="text-sm leading-6 text-[var(--capsule-graphite)]">{observation.text}</p>
-                  <p className="mt-3 font-mono text-xs text-[var(--capsule-ash)]">{new Date(observation.createdAt).toLocaleString()}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-6 text-sm text-[var(--capsule-ash)]">No observations added.</p>
-          )}
-        </details>
-
-        {(artifact.ai || renderLabel) && (
-          <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
-            <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Render Metadata</summary>
-            {renderLabel && (
-              <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
-                {renderLabel} / {artifact.render?.provider || "local"} / motion {artifact.render?.motionSeed || "unseeded"}
-              </p>
-            )}
-            {artifact.ai && (
-              <p className="mt-6 font-mono text-xs text-[var(--capsule-ash)]">
-                {artifact.ai.provider} / {artifact.ai.model} / {artifact.ai.usedFallback ? "structured generator" : "vision"}
-              </p>
-            )}
-          </details>
+        ) : (
+          <p className="mt-4 text-[0.68rem] text-[var(--capsule-muted)]">No observations added.</p>
         )}
+      </details>
 
-        {artifact.storage && (
-          <details className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
-            <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Storage Diagnostics</summary>
-            <div className="mt-6 grid gap-3 font-mono text-xs leading-6 text-[var(--capsule-ash)] sm:grid-cols-2">
-              <p>Method: {artifact.storage.method}</p>
-              <p>Status: {artifact.storage.lastSaveStatus}</p>
-              <p>Compression: {artifact.storage.compressionApplied ? "applied" : "not applied"}</p>
-              <p>Local metadata: {formatBytes(artifact.storage.localStorageBytes)}</p>
-              <p>IndexedDB images: {formatBytes(artifact.storage.indexedDbImageBytes)}</p>
-              <p>Source: {formatBytes(artifact.storage.sourceStoredBytes)} stored</p>
-              {artifact.storage.artifactRenderStoredBytes !== undefined && <p>Render: {formatBytes(artifact.storage.artifactRenderStoredBytes)}</p>}
-              {artifact.storage.droppedImageFields?.length ? <p>Dropped: {artifact.storage.droppedImageFields.join(", ")}</p> : null}
-              {artifact.storage.lastSaveReason && <p>Reason: {artifact.storage.lastSaveReason}</p>}
-            </div>
-          </details>
-        )}
+      {(artifact.ai || renderLabel) ? (
+        <details className="mt-8 border-t border-[rgba(17,16,17,0.1)] pt-5">
+          <summary className="cursor-pointer mono-label text-[0.5rem] text-[var(--capsule-muted)]">RENDER METADATA</summary>
+          {renderLabel ? (
+            <p className="mt-4 font-mono text-[0.58rem] leading-5 text-[var(--capsule-muted)]">
+              {renderLabel} / {artifact.render?.provider || "local"} / motion {artifact.render?.motionSeed || "unseeded"}
+            </p>
+          ) : null}
+          {artifact.ai ? (
+            <p className="mt-4 font-mono text-[0.58rem] leading-5 text-[var(--capsule-muted)]">
+              {artifact.ai.provider} / {artifact.ai.model} / {artifact.ai.usedFallback ? "structured generator" : "vision"}
+            </p>
+          ) : null}
+        </details>
+      ) : null}
 
-        <BottomNav />
-      </section>
-    </main>
+      {artifact.storage ? (
+        <details className="mt-8 border-t border-[rgba(17,16,17,0.1)] pt-5">
+          <summary className="cursor-pointer mono-label text-[0.5rem] text-[var(--capsule-muted)]">STORAGE DIAGNOSTICS</summary>
+          <div className="mt-4 grid gap-2 font-mono text-[0.58rem] leading-5 text-[var(--capsule-muted)]">
+            <p>Method: {artifact.storage.method}</p>
+            <p>Status: {artifact.storage.lastSaveStatus}</p>
+            <p>Compression: {artifact.storage.compressionApplied ? "applied" : "not applied"}</p>
+            <p>Local metadata: {formatBytes(artifact.storage.localStorageBytes)}</p>
+            <p>IndexedDB images: {formatBytes(artifact.storage.indexedDbImageBytes)}</p>
+            <p>Source: {formatBytes(artifact.storage.sourceStoredBytes)} stored</p>
+            {artifact.storage.artifactRenderStoredBytes !== undefined ? <p>Render: {formatBytes(artifact.storage.artifactRenderStoredBytes)}</p> : null}
+            {artifact.storage.droppedImageFields?.length ? <p>Dropped: {artifact.storage.droppedImageFields.join(", ")}</p> : null}
+            {artifact.storage.lastSaveReason ? <p>Reason: {artifact.storage.lastSaveReason}</p> : null}
+          </div>
+        </details>
+      ) : null}
+    </CapsulePhoneFrame>
   );
 }
