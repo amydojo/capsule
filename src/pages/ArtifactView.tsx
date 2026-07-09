@@ -5,13 +5,15 @@ import ArtifactActions from "../components/ArtifactActions";
 import BottomNav from "../components/BottomNav";
 import MetadataTable from "../components/MetadataTable";
 import PreservationField from "../components/PreservationField";
+import RelatedObjectSeed from "../components/artifact/RelatedObjectSeed";
 import SourceEvidenceSlip from "../components/artifact/SourceEvidenceSlip";
 import TopBar from "../components/TopBar";
 import { ROUTES } from "../constants/navigation";
-import { addObservation, loadArtifact, sealArtifact } from "../services/artifactStorage";
+import { addObservation, loadArtifacts, sealArtifact } from "../services/artifactStorage";
 import type { Artifact } from "../types/artifact";
 import { getArtifactHeroImage, getArtifactSourceImage } from "../utils/artifactImage";
 import { normalizeArtifactRecord } from "../utils/artifactRecord";
+import { findRelatedArtifactSeed } from "../utils/relatedArtifacts";
 
 const polishVisibleDetail = (detail: string) => {
   const normalized = detail.toLowerCase();
@@ -45,6 +47,7 @@ export default function ArtifactView() {
   const { id } = useParams();
   const timelineRef = useRef<HTMLDetailsElement>(null);
   const [artifact, setArtifact] = useState<Artifact | undefined>();
+  const [allArtifacts, setAllArtifacts] = useState<Artifact[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(id));
   const [showObservationInput, setShowObservationInput] = useState(false);
   const [observationText, setObservationText] = useState("");
@@ -60,8 +63,10 @@ export default function ArtifactView() {
       };
     }
 
-    void loadArtifact(id).then((loadedArtifact) => {
+    void loadArtifacts().then((loadedArtifacts) => {
       if (cancelled) return;
+      const loadedArtifact = loadedArtifacts.find((item) => item.id === id);
+      setAllArtifacts(loadedArtifacts);
       setArtifact(loadedArtifact);
       setIsLoading(false);
     });
@@ -140,6 +145,7 @@ export default function ArtifactView() {
     { label: "Render", value: artifactRecord.source.artifactRenderDataUrl ? "retained" : "not recorded" },
     { label: "Boundary", value: artifactRecord.source.objectBoundary ? "recorded" : "not recorded" },
   ];
+  const relatedSeed = findRelatedArtifactSeed(artifact, allArtifacts);
   const renderLabel =
     artifact.render?.pristineStatus === "success" && artifact.pristineSpecimenDataUrl
       ? "Pristine specimen"
@@ -151,13 +157,17 @@ export default function ArtifactView() {
 
   const handleSeal = async () => {
     const updated = await sealArtifact(artifact.id);
-    if (updated) setArtifact(updated);
+    if (updated) {
+      setArtifact(updated);
+      setAllArtifacts((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+    }
   };
 
   const handleAddObservation = async () => {
     const updated = await addObservation(artifact.id, observationText);
     if (updated) {
       setArtifact(updated);
+      setAllArtifacts((current) => current.map((item) => (item.id === updated.id ? updated : item)));
       setObservationText("");
       setShowObservationInput(false);
     }
@@ -318,6 +328,8 @@ export default function ArtifactView() {
             <SourceEvidenceSlip title="Source Evidence" sourceImageSrc={sourceEvidenceImage} sourceImageAlt={`${recordTitle} source evidence`} metrics={sourceEvidenceMetrics} />
           </div>
         )}
+
+        <RelatedObjectSeed seed={relatedSeed} />
 
         <details ref={timelineRef} className="mx-auto mt-16 max-w-4xl border-t border-[var(--capsule-line)] pt-10">
           <summary className="cursor-pointer mono-label text-[0.66rem] text-[var(--capsule-ash)]">Artifact Timeline</summary>
