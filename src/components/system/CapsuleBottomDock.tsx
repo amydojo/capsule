@@ -18,7 +18,7 @@ export default function CapsuleBottomDock({ mode = "archive", className }: Capsu
     <nav
       aria-label="Capsule navigation"
       className={joinClasses(
-        "mx-auto grid h-11 w-full max-w-[336px] grid-cols-3 items-center rounded-full border px-2.5",
+        "capsule-bottom-dock mx-auto grid w-full grid-cols-3 items-center rounded-full border px-2.5",
         preservation ? "border-white/10 bg-[rgba(17,16,17,0.5)] text-[var(--capsule-linen-ash)]" : "border-black/10 bg-[var(--capsule-paper)] text-[var(--capsule-muted)]",
         className,
       )}

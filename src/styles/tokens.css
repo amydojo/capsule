@@ -15,11 +15,17 @@
   --capsule-muted: #7D766C;
   --capsule-green: #7F8B63;
 
-  --capsule-phone-width: 480px;
+  --capsule-phone-width: 880px;
   --capsule-phone-height: 760px;
   --capsule-preview-phone-width: 300px;
   --capsule-preview-phone-height: 650px;
-  --capsule-content-max-width: 440px;
+  --capsule-mobile-content-max: 440px;
+  --capsule-tablet-surface-width: 640px;
+  --capsule-desktop-surface-width: 880px;
+  --capsule-content-max-width: 780px;
+  --capsule-dock-height: 56px;
+  --capsule-mobile-dock-offset: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  --capsule-mobile-bottom-space: calc(var(--capsule-dock-height) + env(safe-area-inset-bottom, 0px) + 56px);
   --capsule-inset: 24px;
   --capsule-inset-wide: 32px;
   --capsule-radius-phone: 32px;
