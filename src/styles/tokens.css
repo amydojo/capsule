@@ -15,8 +15,11 @@
   --capsule-muted: #7D766C;
   --capsule-green: #7F8B63;
 
-  --capsule-phone-width: 300px;
-  --capsule-phone-height: 650px;
+  --capsule-phone-width: 480px;
+  --capsule-phone-height: 760px;
+  --capsule-preview-phone-width: 300px;
+  --capsule-preview-phone-height: 650px;
+  --capsule-content-max-width: 440px;
   --capsule-inset: 24px;
   --capsule-inset-wide: 32px;
   --capsule-radius-phone: 32px;

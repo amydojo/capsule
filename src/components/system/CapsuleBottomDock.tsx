@@ -18,7 +18,7 @@ export default function CapsuleBottomDock({ mode = "archive", className }: Capsu
     <nav
       aria-label="Capsule navigation"
       className={joinClasses(
-        "mx-auto grid h-[38px] w-full max-w-[252px] grid-cols-3 items-center rounded-full border px-2",
+        "mx-auto grid h-11 w-full max-w-[336px] grid-cols-3 items-center rounded-full border px-2.5",
         preservation ? "border-white/10 bg-[rgba(17,16,17,0.5)] text-[var(--capsule-linen-ash)]" : "border-black/10 bg-[var(--capsule-paper)] text-[var(--capsule-muted)]",
         className,
       )}
@@ -32,7 +32,7 @@ export default function CapsuleBottomDock({ mode = "archive", className }: Capsu
             to={item.route}
             aria-current={active ? "page" : undefined}
             className={joinClasses(
-              "relative grid h-full min-w-0 place-items-center px-1 text-center text-[0.52rem] font-medium transition",
+              "relative grid h-full min-w-0 place-items-center px-1 text-center text-[0.56rem] font-medium transition",
               active ? "text-[var(--capsule-red)]" : preservation ? "hover:text-white" : "hover:text-[var(--capsule-black)]",
             )}
           >
