@@ -13,7 +13,7 @@ export default function CapsuleStatusBar({ mode = "archive", className }: Capsul
   return (
     <div
       className={joinClasses(
-        "flex h-10 shrink-0 items-center justify-between px-[22px] pt-2 text-[0.56rem] font-semibold tracking-[0.01em]",
+        "capsule-status-bar flex h-10 shrink-0 items-center justify-between px-[22px] pt-2 text-[0.56rem] font-semibold tracking-[0.01em]",
         preservation ? "text-white" : "text-[var(--capsule-black)]",
         className,
       )}
