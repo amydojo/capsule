@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { generateFallbackArtifactPayload } from "../fallback/generateFallbackArtifact.js";
 import { artifactSystemPrompt, buildArtifactUserPrompt } from "../prompts/artifactPrompt.js";
+import { collectProviderResults, mergeProviderResultsIntoRecord } from "../providers/index.js";
 import { ArtifactSchema, CaptureInputSchema, GeneratedArtifactSchema } from "../schemas/artifactSchema.js";
 import { normalizeArtifactRecord } from "./artifactRecord.js";
 
@@ -36,7 +37,22 @@ const normalizeGeneratedPayload = (payload, input) => {
   return result.success ? result.data : fallback;
 };
 
-const buildArtifact = (generated, input, ai) => {
+const buildProviderInput = (input, artifactRecord) => ({
+  imageDataUrl: input.imageDataUrl,
+  specimenImageDataUrl: input.specimenImageDataUrl,
+  objectBoundary: input.objectBoundary,
+  artifactRecord,
+  context: {
+    objectName: input.objectName,
+    whyNow: input.whyNow,
+    origin: input.origin,
+    collection: input.collection,
+    capturePoint: input.capturePoint,
+  },
+  requestId: crypto.randomUUID(),
+});
+
+const buildArtifact = (generated, input, ai, providerResults) => {
   const now = new Date().toISOString();
   const specimenImage = input.specimenImageDataUrl || input.imageDataUrl;
   const extraction = input.objectBoundary
@@ -90,14 +106,14 @@ const buildArtifact = (generated, input, ai) => {
 
   const artifactWithRecord = {
     ...artifact,
-    record: normalizeArtifactRecord(artifact),
+    record: mergeProviderResultsIntoRecord(normalizeArtifactRecord(artifact), providerResults),
   };
 
   const result = ArtifactSchema.safeParse(artifactWithRecord);
   if (!result.success) {
     const fallback = generateFallbackArtifactPayload(input);
     const fallbackArtifact = { ...artifact, ...fallback, ai: { provider: "server", model: "fallback", usedFallback: true } };
-    return ArtifactSchema.parse({ ...fallbackArtifact, record: normalizeArtifactRecord(fallbackArtifact) });
+    return ArtifactSchema.parse({ ...fallbackArtifact, record: mergeProviderResultsIntoRecord(normalizeArtifactRecord(fallbackArtifact), providerResults) });
   }
   return result.data;
 };
@@ -150,9 +166,11 @@ export const generateArtifactFromInput = async (input) => {
     generatedPayload = generateFallbackArtifactPayload(input);
   }
 
+  const providerResults = await collectProviderResults(buildProviderInput(input));
+
   return buildArtifact(generatedPayload, input, {
     provider,
     model: modelUsed,
     usedFallback,
-  });
+  }, providerResults);
 };
