@@ -35,7 +35,7 @@ export default function CaptureFrame({
       <div className="pointer-events-none absolute right-5 top-5 z-20 rounded-full border border-white/14 bg-black/24 px-3 py-1.5 backdrop-blur">
         <span className="mono-label text-[0.56rem] text-white/58">{status}</span>
       </div>
-      <div className="relative z-10 flex min-h-[52dvh] items-center justify-center sm:min-h-[38rem]">{children}</div>
+      <div className="relative z-10 flex min-h-[318px] items-center justify-center">{children}</div>
     </div>
   );
 }

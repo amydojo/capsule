@@ -1,58 +1,42 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import BottomNav from "../components/BottomNav";
-import ContinuityBar from "../components/ContinuityBar";
-import PreservationField from "../components/PreservationField";
-import TopBar from "../components/TopBar";
+import { Link, useNavigate } from "react-router-dom";
+import CapsuleArchiveSlip from "../components/system/CapsuleArchiveSlip";
+import CapsuleBottomDock from "../components/system/CapsuleBottomDock";
+import CapsuleObjectPlate from "../components/system/CapsuleObjectPlate";
+import CapsulePhoneFrame from "../components/system/CapsulePhoneFrame";
+import CapsuleScreenHeader from "../components/system/CapsuleScreenHeader";
 import { getArtifactRoute, ROUTES } from "../constants/navigation";
-import { artifacts as sampleArtifacts, primaryArtifact } from "../data/artifacts";
+import { artifacts as sampleArtifacts } from "../data/artifacts";
 import { loadArtifacts } from "../services/artifactStorage";
 import type { Artifact, ArtifactLifecycleStatus } from "../types/artifact";
 import { getArtifactHeroImage, hasObjectFieldPending } from "../utils/artifactImage";
 
-const ArtifactRow = ({ artifact, linked = true }: { artifact: Artifact; linked?: boolean }) => {
+const ArtifactIndexRow = ({ artifact, linked = true }: { artifact: Artifact; linked?: boolean }) => {
   const heroImage = getArtifactHeroImage(artifact);
   const content = (
-    <article className="grid gap-5 rounded-[1.55rem] border border-[var(--capsule-line-dark)] bg-white/[0.045] p-3 transition hover:border-[rgba(154,149,86,0.45)] hover:bg-white/[0.07] sm:grid-cols-[15rem_1fr] sm:items-center">
-      <PreservationField mode="vault" imageDataUrl={heroImage} imageAlt={artifact.title} motionSeed={artifact.render?.motionSeed} render={artifact.render} />
-      <div className="grid gap-6 md:grid-cols-[1fr_13rem] md:items-center">
-        <div>
-          <p className="font-mono text-xs text-[var(--capsule-mineral-olive)]">{artifact.id}</p>
-          <h2 className="mt-2 text-2xl font-semibold text-[var(--capsule-bone)]">{artifact.title}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--capsule-ash-dim)]">{artifact.essence || artifact.classification}</p>
-          {hasObjectFieldPending(artifact) && <p className="mt-3 mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">Object field pending.</p>}
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">Captured</p>
-              <p className="mt-2 text-sm text-[var(--capsule-bone)]">{artifact.capturePoint}</p>
-            </div>
-            <div>
-              <p className="mono-label text-[0.58rem] text-[var(--capsule-ash-dim)]">Preservation State</p>
-              <p className="mt-2 flex items-center gap-2 text-sm text-[var(--capsule-bone)]">
-                <span className="h-2 w-2 rounded-full bg-[var(--capsule-mineral-olive)]" />
-                {artifact.preservationState}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <p className="mono-label mb-3 text-[0.58rem] text-[var(--capsule-ash-dim)]">Continuity</p>
-          <ContinuityBar value={artifact.continuityScore} tone="dark" />
-        </div>
+    <article className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 border-b border-white/10 py-3 last:border-b-0">
+      <div className="grid h-11 w-11 place-items-center rounded-[10px] border border-black/[0.05] bg-[var(--capsule-paper)]">
+        {heroImage ? <img src={heroImage} alt={artifact.title} className="max-h-9 max-w-9 object-contain" /> : <span className="h-5 w-7 rounded-sm bg-[var(--capsule-printed-bone)]" aria-hidden="true" />}
+      </div>
+      <div className="min-w-0">
+        <p className="font-mono text-[0.48rem] text-[var(--capsule-linen-ash)]">{artifact.id}</p>
+        <h3 className="mt-1 truncate text-[0.72rem] font-medium text-white">{artifact.title}</h3>
+        <p className="mt-1 truncate text-[0.55rem] text-[var(--capsule-linen-ash)]">{artifact.origin}</p>
       </div>
     </article>
   );
 
-  return linked ? (
+  if (!linked) return content;
+
+  return (
     <Link to={getArtifactRoute(artifact.id)} className="block">
       {content}
     </Link>
-  ) : (
-    content
   );
 };
 
 export default function Archive() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ArtifactLifecycleStatus | "all">("all");
   const [generatedArtifacts, setGeneratedArtifacts] = useState<Artifact[]>([]);
@@ -72,109 +56,99 @@ export default function Archive() {
     const normalizedQuery = query.trim().toLowerCase();
     return generatedArtifacts.filter((artifact) => {
       const matchesQuery =
-        !normalizedQuery ||
-        [artifact.title, artifact.commonName, artifact.classification, artifact.essence].some((value) => value.toLowerCase().includes(normalizedQuery));
+        !normalizedQuery || [artifact.title, artifact.commonName, artifact.classification, artifact.essence, artifact.origin].some((value) => value.toLowerCase().includes(normalizedQuery));
       const matchesStatus = statusFilter === "all" || artifact.preservationState === statusFilter;
       return matchesQuery && matchesStatus;
     });
   }, [generatedArtifacts, query, statusFilter]);
 
   const featuredArtifact = filteredArtifacts[0];
-  const indexArtifacts = featuredArtifact ? filteredArtifacts.slice(1) : filteredArtifacts;
+  const indexArtifacts = featuredArtifact ? filteredArtifacts.slice(1, 4) : filteredArtifacts.slice(0, 3);
+  const referenceArtifacts = sampleArtifacts.slice(0, 3);
   const objectCount = generatedArtifacts.length;
-  const objectCountLabel = `${objectCount} ${objectCount === 1 ? "object" : "objects"} preserved`;
+  const objectCountLabel = `${objectCount} total`;
 
   return (
-    <main className="instrument-shell min-h-[100dvh] overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+4rem)]">
-      <TopBar fossilId={generatedArtifacts[0]?.id || primaryArtifact.id} tone="dark" />
-      <section className="mx-auto w-full max-w-[78rem] px-5 sm:px-8 lg:px-10">
-        <div className="mb-8 flex flex-col justify-between gap-5 border-b border-[var(--capsule-line-dark)] pb-7 sm:flex-row sm:items-end">
-          <div>
-            <p className="mono-label text-[0.68rem] text-[var(--capsule-ash-dim)]">Object archive</p>
-            <h1 className="mt-2 text-4xl font-semibold uppercase tracking-[0.04em] text-[var(--capsule-bone)] sm:text-5xl">VAULT</h1>
-          </div>
-          <div className="flex flex-col gap-3 sm:items-end">
-            <p className="max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">{objectCountLabel}</p>
-            <Link to={ROUTES.capture} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--capsule-bone)] px-6 py-3 text-sm font-semibold text-[var(--capsule-graphite-black)] shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-              Preserve Object
-            </Link>
-          </div>
-        </div>
+    <CapsulePhoneFrame mode="preservation" footer={<CapsuleBottomDock mode="preservation" />}>
+      <CapsuleScreenHeader
+        mode="preservation"
+        eyebrow="Vault"
+        subtitle="Object archive"
+        trailing={{ label: "+", ariaLabel: "Preserve a new object", onClick: () => navigate(ROUTES.capture) }}
+      />
+
+      <section className="pt-8">
+        <h1 className="text-[1.78rem] font-medium leading-[1.02] tracking-normal text-white">All Objects</h1>
+        <p className="mt-2 font-mono text-[0.56rem] text-[var(--capsule-linen-ash)]">{objectCountLabel}</p>
+        <div className="mt-7 h-px bg-white/12" />
 
         {generatedArtifacts.length > 0 && (
-          <div className="mb-6 grid gap-3 sm:grid-cols-[1fr_12rem]">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search artifact records"
-              className="rounded-full border border-[var(--capsule-line-dark)] bg-white/[0.055] px-5 py-3 text-sm text-[var(--capsule-bone)] outline-none placeholder:text-[var(--capsule-ash-dim)]"
-            />
-            <select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as ArtifactLifecycleStatus | "all")}
-              className="rounded-full border border-[var(--capsule-line-dark)] bg-[var(--capsule-panel-black)] px-5 py-3 text-sm text-[var(--capsule-bone)] outline-none"
-            >
-              <option value="all">All states</option>
-              <option value="active">Active</option>
-              <option value="sealed">Sealed</option>
-              <option value="rediscovered">Rediscovered</option>
-            </select>
+          <div className="mt-5 grid gap-2">
+            <label className="block">
+              <span className="sr-only">Search artifact records</span>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search records"
+                className="h-9 w-full rounded-full border border-white/10 bg-white/[0.045] px-4 text-[0.66rem] text-white outline-none placeholder:text-[var(--capsule-linen-ash)]"
+              />
+            </label>
+            <label className="block">
+              <span className="sr-only">Filter by preservation state</span>
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as ArtifactLifecycleStatus | "all")}
+                className="h-9 w-full rounded-full border border-white/10 bg-[var(--capsule-black)] px-4 text-[0.62rem] text-[var(--capsule-linen-ash)] outline-none"
+              >
+                <option value="all">All states</option>
+                <option value="active">Active</option>
+                <option value="sealed">Sealed</option>
+                <option value="rediscovered">Rediscovered</option>
+              </select>
+            </label>
           </div>
         )}
-
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
-          {[
-            "All Records",
-            "Objects",
-            "Specimens",
-            "Source Evidence",
-          ].map((label, index) => (
-            <span key={label} className={`mono-label shrink-0 rounded-full border px-4 py-2 text-[0.56rem] ${index === 0 ? "border-[rgba(154,149,86,0.48)] bg-[rgba(154,149,86,0.12)] text-[var(--capsule-mineral-olive-bright)]" : "border-[var(--capsule-line-dark)] bg-white/[0.04] text-[var(--capsule-ash-dim)]"}`}>
-              {label}
-            </span>
-          ))}
-        </div>
 
         {generatedArtifacts.length === 0 ? (
-          <div className="rounded-[1.7rem] border border-[var(--capsule-line-dark)] bg-white/[0.045] p-10 text-center">
-            <p className="text-lg font-semibold text-[var(--capsule-bone)]">The Vault is ready for its first preserved object.</p>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-[var(--capsule-ash-dim)]">Present source evidence to begin the archive.</p>
-            <Link to={ROUTES.capture} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--capsule-bone)] px-6 py-3 text-sm font-semibold text-[var(--capsule-graphite-black)]">
+          <CapsuleArchiveSlip
+            mode="preservation"
+            eyebrow="VAULT READY"
+            title="The first preserved object will appear here."
+            className="mt-6"
+          >
+            <p className="mt-3 text-[0.62rem] leading-4 text-[var(--capsule-linen-ash)]">Present source evidence to begin the archive.</p>
+            <button type="button" onClick={() => navigate(ROUTES.capture)} className="mt-5 h-9 w-full rounded-full bg-[var(--capsule-cream)] text-[0.62rem] font-semibold text-[var(--capsule-black)]">
               Preserve Object
-            </Link>
-          </div>
+            </button>
+          </CapsuleArchiveSlip>
+        ) : featuredArtifact ? (
+          <Link to={getArtifactRoute(featuredArtifact.id)} className="mt-6 block rounded-[18px] border border-white/10 bg-white/[0.045] p-3">
+            <div className="grid grid-cols-[102px_minmax(0,1fr)] gap-4">
+              <CapsuleObjectPlate mode="archive" imageSrc={getArtifactHeroImage(featuredArtifact)} imageAlt={featuredArtifact.title} className="min-h-[102px]" />
+              <div className="min-w-0 py-2">
+                <p className="mono-label text-[0.44rem] text-[var(--capsule-linen-ash)]">{featuredArtifact.id}</p>
+                <h2 className="mt-3 text-[0.95rem] font-semibold leading-tight text-white">{featuredArtifact.title}</h2>
+                <p className="mt-2 max-h-12 overflow-hidden text-[0.58rem] leading-4 text-[var(--capsule-linen-ash)]">{featuredArtifact.essence || featuredArtifact.classification}</p>
+                {hasObjectFieldPending(featuredArtifact) && <p className="mt-2 mono-label text-[0.42rem] text-[var(--capsule-linen-ash)]">Object field pending</p>}
+                <span className="mt-3 block h-1 w-1 rounded-full bg-[var(--capsule-red)]" aria-hidden="true" />
+              </div>
+            </div>
+          </Link>
         ) : (
-          <div className="space-y-4">
-            {featuredArtifact && (
-              <Link to={getArtifactRoute(featuredArtifact.id)} className="block rounded-[2rem] border border-[rgba(154,149,86,0.45)] bg-[rgba(154,149,86,0.08)] p-3 shadow-[0_26px_78px_rgba(0,0,0,0.28)]">
-                <p className="mono-label mb-3 px-2 text-[0.58rem] text-[var(--capsule-mineral-olive-bright)]">Recent Artifact Record</p>
-                <ArtifactRow artifact={featuredArtifact} linked={false} />
-                <div className="mt-4 flex justify-center gap-2">
-                  <span className="h-1.5 w-5 rounded-full bg-[var(--capsule-mineral-olive)]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-white/22" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-white/22" />
-                </div>
-              </Link>
-            )}
-            {indexArtifacts.length > 0 && <p className="mono-label px-1 pt-4 text-[0.62rem] text-[var(--capsule-ash-dim)]">Object Index</p>}
-            {indexArtifacts.map((artifact) => (
-              <ArtifactRow key={artifact.id} artifact={artifact} />
-            ))}
-          </div>
+          <CapsuleArchiveSlip mode="preservation" eyebrow="NO MATCHES" title="No local record matches that search." className="mt-6" />
         )}
 
-        {(generatedArtifacts.length === 0 || filteredArtifacts.length === 0) && (
-          <section className="mt-12 border-t border-[var(--capsule-line-dark)] pt-8">
-            <p className="mono-label mb-5 text-[0.68rem] text-[var(--capsule-ash-dim)]">Reference objects</p>
-            <div className="space-y-4">
-              {sampleArtifacts.slice(0, 3).map((artifact) => (
-                <ArtifactRow key={artifact.id} artifact={artifact} linked={false} />
-              ))}
-            </div>
-          </section>
-        )}
-        <BottomNav tone="dark" />
+        <div className="mt-8 flex items-center justify-between">
+          <p className="mono-label text-[0.48rem] text-[var(--capsule-linen-ash)]">Recently added</p>
+          <p className="text-[0.56rem] text-[var(--capsule-linen-ash)]">View all</p>
+        </div>
+
+        <div className="mt-3">
+          {(indexArtifacts.length ? indexArtifacts : referenceArtifacts).map((artifact) => (
+            <ArtifactIndexRow key={artifact.id} artifact={artifact} linked={indexArtifacts.length > 0} />
+          ))}
+        </div>
       </section>
-    </main>
+    </CapsulePhoneFrame>
   );
 }
